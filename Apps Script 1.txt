@@ -1,0 +1,360 @@
+Apps Script 1
+// 코드.gs
+
+// --- 상수 정의 ---
+const TARGET_SHEET_NAME = "퀘스트 트래커";
+
+// 서버 리셋 시간 (한국 시간 기준 시)
+const RESET_TIMES = {
+  ASIA: 1,   // 01시
+  EU: 7,     // 07시
+  NA: 16     // 16시
+};
+
+// 서버별 배경색
+const SERVER_COLORS = {
+  ASIA: '#FFF4E6',  // 밝은 오렌지
+  EU: '#E6F3FF',    // 밝은 하늘색
+  NA: '#E6FFE6'     // 밝은 민트
+};
+
+// 계정 및 서버 목록
+const ACCOUNTS = ["T", "H"];
+const SERVERS = ["ASIA", "EU", "NA"];
+
+// 시트 구조 관련 상수
+const HEADER_ROW_COUNT = 1;
+const ROWS_PER_SERVER_BLOCK = 3;
+
+// 열 번호 상수
+const COL_LAST_MODIFIED_ALL = 1; // A열: 마지막 수정 (전체)
+const COL_SERVER_NAME = 2;         // B열: 서버명
+const COL_SERVER_TIMESTAMP = 3;    // C열: 서버 수정 시간
+const COL_DAILY_QUEST = 4;         // D열: 일일 퀘스트
+const COL_DAILY_PROGRESS = 5;      // E열: 일일 진행도
+const COL_DAILY_CHECKBOX = 6;      // F열: 일일 완료
+const COL_WEEKLY_QUEST = 7;        // G열: 주간 퀘스트
+const COL_WEEKLY_PROGRESS = 8;     // H열: 주간 진행도
+const COL_WEEKLY_CHECKBOX = 9;     // I열: 주간 완료
+const COL_EVENT_QUEST = 10;        // J열: 이벤트 퀘스트
+const COL_EVENT_PROGRESS = 11;     // K열: 이벤트 진행도
+const COL_EVENT_CHECKBOX = 12;     // L열: 이벤트 완료
+const COL_RESET_TIMER = 13;        // M열: 다음 리셋
+
+// 퀘스트 관련 열 그룹 (가독성을 위해 정의)
+const QUEST_AREA_START_COL = COL_DAILY_QUEST;
+const QUEST_AREA_END_COL = COL_EVENT_CHECKBOX;
+const PROGRESS_COLS = [COL_DAILY_PROGRESS, COL_WEEKLY_PROGRESS, COL_EVENT_PROGRESS];
+const CHECKBOX_COLS = [COL_DAILY_CHECKBOX, COL_WEEKLY_CHECKBOX, COL_EVENT_CHECKBOX];
+
+// --- 함수 정의 ---
+
+/**
+ * 1. 체크박스 클릭 또는 진행도 완료 시 퀘스트 관련 셀 초기화
+ * @param {Sheet} sheet 대상 시트
+ * @param {Range} checkboxCell 클릭된 체크박스 셀 또는 완료된 진행도의 체크박스 셀
+ */
+function handleCheckboxAction(sheet, checkboxCell) {
+  if (!sheet || !checkboxCell) return;
+  try {
+    const row = checkboxCell.getRow();
+    // 체크박스 열 기준으로 퀘스트 내용 열까지의 오프셋은 -2 (예: F열(6) -> D열(4))
+    const startCol = checkboxCell.getColumn() - 2; 
+    
+    // 퀘스트+진행도+체크박스 초기화 (3개 셀)
+    const targetRange = sheet.getRange(row, startCol, 1, 3);
+    targetRange.clearContent();
+    
+    // 체크박스 재생성 및 값 초기화 (강제 적용)
+    checkboxCell.setDataValidation(
+      SpreadsheetApp.newDataValidation().requireCheckbox().build()
+    ).setValue(false);
+    
+  } catch (error) {
+    console.error(`[${checkboxCell.getA1Notation()}] 퀘스트 초기화 오류:`, error);
+  }
+}
+
+/**
+ * 2. 진행도 셀 수정 시 목표 달성 여부 확인 및 처리
+ * @param {Sheet} sheet 대상 시트
+ * @param {Range} progressCell 수정된 진행도 셀
+ */
+function updateProgress(sheet, progressCell) {
+  if (!sheet || !progressCell) return;
+  try {
+    const questCell = progressCell.offset(0, -1); // 진행도 셀 바로 왼쪽이 퀘스트 내용 셀
+    const checkboxCell = progressCell.offset(0, 1); // 진행도 셀 바로 오른쪽이 체크박스 셀
+    const currentValue = Number(progressCell.getValue());
+    
+    // 진행도 값이 숫자가 아니면 처리 중단 (선택적 오류 방지)
+    if (isNaN(currentValue)) {
+      // console.warn("진행도에 유효하지 않은 값이 입력되었습니다:", progressCell.getA1Notation(), progressCell.getValue());
+      return; 
+    }
+
+    const questText = questCell.getValue().toString();
+    
+    // 퀘스트 텍스트에서 마지막 숫자를 목표치로 추출
+    const numbers = questText.match(/\d+/g);
+    const target = numbers ? Number(numbers.pop()) : -1; // 숫자가 없으면 -1
+    
+    // 유효한 목표치가 있고, 현재 진행도가 목표치 이상이면 초기화 함수 호출
+    if (target > 0 && currentValue >= target) {
+      handleCheckboxAction(sheet, checkboxCell);
+    }
+  } catch (error) {
+    console.error(`[${progressCell.getA1Notation()}] 진행도 처리 오류:`, error);
+  }
+}
+
+/**
+ * 3. 모든 서버의 리셋 시간 계산 및 업데이트 (주기적 실행 권장)
+ * @param {Sheet} sheet 대상 시트
+ */
+function updateAllResetTimes(sheet) {
+  const now = new Date();
+  const krNow = new Date(now.getTime() + 9 * 3600000); // UTC+9 (한국 시간)
+  const krHours = krNow.getUTCHours();
+  const krMinutes = krNow.getUTCMinutes();
+
+  ACCOUNTS.forEach((acc, accIndex) => {
+    const accountStartRow = HEADER_ROW_COUNT + 1 + (accIndex * SERVERS.length * ROWS_PER_SERVER_BLOCK);
+    SERVERS.forEach((server, serverIndex) => {
+      // 각 서버 블록의 시작 행 계산
+      const serverRow = accountStartRow + serverIndex * ROWS_PER_SERVER_BLOCK;
+      updateServerResetTime(sheet, serverRow, server, krHours, krMinutes);
+    });
+  });
+}
+
+/**
+ * 특정 서버의 리셋 시간 계산 및 업데이트
+ * @param {Sheet} sheet 대상 시트
+ * @param {number} row 리셋 시간을 표시할 행 (서버 블록의 시작 행)
+ * @param {string} server 서버 이름 ("ASIA", "EU", "NA")
+ * @param {number} krHours 현재 한국 시간 (시)
+ * @param {number} krMinutes 현재 한국 시간 (분)
+ */
+function updateServerResetTime(sheet, row, server, krHours, krMinutes) {
+  try {
+    const resetHour = RESET_TIMES[server];
+    let hoursLeft = resetHour - krHours;
+    let minutesLeft = 60 - krMinutes;
+
+    // 다음 정각일 때 분 처리
+    if (minutesLeft === 60) {
+      minutesLeft = 0; // 60분 남음 -> 0분 남음
+    } else {
+      hoursLeft -= 1; // 정각이 아니면 시간에서 1 빼기 (분 단위를 올렸으므로)
+    }
+
+    // 시간이 음수면 하루(24시간) 더하기
+    if (hoursLeft < 0) {
+      hoursLeft += 24;
+    }
+
+    // M열에 남은 시간 업데이트 ("H:MM" 형식)
+    sheet.getRange(row, COL_RESET_TIMER)
+      .setValue(`${hoursLeft}:${minutesLeft.toString().padStart(2, '0')}`);
+  } catch (error) {
+     console.error(`[${server}, Row ${row}] 리셋 시간 업데이트 오류:`, error);
+  }
+}
+
+/**
+ * 4. 시트가 없을 경우 초기 구조 및 서식 설정
+ */
+function initializeSheet() {
+  const ss = SpreadsheetApp.getActive();
+  let sheet = ss.getSheetByName(TARGET_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(TARGET_SHEET_NAME);
+  } else {
+    // 시트가 이미 있다면 초기화 불필요 (필요시 기존 내용 삭제 로직 추가 가능)
+    // return;
+  }
+
+  // --- 헤더 설정 ---
+  sheet.getRange(HEADER_ROW_COUNT, 1, 1, COL_RESET_TIMER).setValues([[ // 1행, A열부터 M열까지
+    "마지막 수정", "", "서버 수정 시간", "일일 퀘스트", "진행도", "완료",
+    "주간 퀘스트", "진행도", "완료", "이벤트 퀘스트", "진행도", "완료", "다음 리셋"
+  ]]).setFontWeight("bold");
+
+  // --- 계정 및 서버 구조 생성 ---
+  const totalServers = SERVERS.length;
+  const totalDataRows = ACCOUNTS.length * totalServers * ROWS_PER_SERVER_BLOCK; // 총 데이터 행 수 계산
+  const lastDataRow = HEADER_ROW_COUNT + totalDataRows; // 데이터가 들어갈 마지막 행 번호
+
+  ACCOUNTS.forEach((acc, accIndex) => {
+    const accountStartRow = HEADER_ROW_COUNT + 1 + (accIndex * totalServers * ROWS_PER_SERVER_BLOCK);
+    const accountTotalRows = totalServers * ROWS_PER_SERVER_BLOCK; // 계정당 총 행 수
+
+    // 계정명 병합 (A열)
+    sheet.getRange(accountStartRow, COL_LAST_MODIFIED_ALL, accountTotalRows, 1)
+      .merge()
+      .setValue(acc)
+      .setVerticalAlignment("middle")
+      .setHorizontalAlignment("center");
+
+    // 서버별 영역 설정
+    SERVERS.forEach((server, serverIndex) => {
+      const serverRow = accountStartRow + serverIndex * ROWS_PER_SERVER_BLOCK; // 각 서버 시작 행
+      const serverColor = SERVER_COLORS[server];
+
+      // 서버명 병합 (B열)
+      sheet.getRange(serverRow, COL_SERVER_NAME, ROWS_PER_SERVER_BLOCK, 1)
+        .merge()
+        .setValue(server)
+        .setBackground(serverColor)
+        .setFontWeight("bold")
+        .setVerticalAlignment("middle")
+        .setHorizontalAlignment("center");
+
+      // 서버 수정시간 병합 및 서식 (C열)
+      sheet.getRange(serverRow, COL_SERVER_TIMESTAMP, ROWS_PER_SERVER_BLOCK, 1)
+        .merge()
+        .setBackground(serverColor)
+        .setNumberFormat("yyyy-MM-dd HH:mm:ss")
+        .setVerticalAlignment("middle");
+
+      // 퀘스트 영역 배경색 적용 (D열 ~ L열)
+      sheet.getRange(serverRow, QUEST_AREA_START_COL, ROWS_PER_SERVER_BLOCK, QUEST_AREA_END_COL - QUEST_AREA_START_COL + 1)
+        .setBackground(serverColor);
+
+       // 다음 리셋 시간 표시 셀 병합 및 서식 (M열)
+      sheet.getRange(serverRow, COL_RESET_TIMER, ROWS_PER_SERVER_BLOCK, 1)
+        .merge()
+        .setNumberFormat("H:mm") // 남은 시간 형식
+        .setBackground(serverColor)
+        .setVerticalAlignment("middle");
+    });
+  });
+
+  // --- 체크박스 설정 ---
+  // 데이터 시작 행(2)부터 계산된 마지막 데이터 행까지 적용
+  CHECKBOX_COLS.forEach(col => {
+    sheet.getRange(HEADER_ROW_COUNT + 1, col, totalDataRows, 1)
+      .setDataValidation(
+        SpreadsheetApp.newDataValidation().requireCheckbox().build()
+      );
+  });
+
+  // --- 기타 서식 설정 ---
+  // A1 셀 서식 강제 적용
+  sheet.getRange(HEADER_ROW_COUNT, COL_LAST_MODIFIED_ALL)
+    .setNumberFormat("yyyy-MM-dd HH:mm:ss");
+
+  // 시트 활성화 및 첫 행/열 고정 (편의성)
+  sheet.activate();
+  sheet.setFrozenRows(HEADER_ROW_COUNT);
+  sheet.setFrozenColumns(COL_SERVER_TIMESTAMP); // A, B, C 열 고정
+
+  // 초기 리셋 시간 업데이트
+  updateAllResetTimes(sheet);
+}
+
+/**
+ * 5. 스프레드시트 열 때 시트 확인 및 초기화 실행
+ */
+function onOpen() {
+  const ss = SpreadsheetApp.getActive();
+  const sheet = ss.getSheetByName(TARGET_SHEET_NAME);
+  // 시트가 없거나, 헤더가 비어있는 등 초기화가 필요한 경우 initializeSheet 호출
+  if (!sheet || sheet.getRange(HEADER_ROW_COUNT, COL_DAILY_QUEST).getValue() === "") {
+     initializeSheet();
+  }
+  // 메뉴 추가 (옵션)
+  SpreadsheetApp.getUi()
+      .createMenu('퀘스트 관리')
+      .addItem('시트 초기화/재설정', 'initializeSheet')
+      .addItem('리셋 시간 수동 업데이트', 'manualUpdateTime')
+      .addToUi();
+}
+
+// 수동 업데이트 함수 (메뉴용)
+function manualUpdateTime() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TARGET_SHEET_NAME);
+  if(sheet) {
+    updateAllResetTimes(sheet);
+    SpreadsheetApp.getActiveSpreadsheet().toast("리셋 시간을 업데이트했습니다.");
+  } else {
+     SpreadsheetApp.getActiveSpreadsheet().toast("시트를 찾을 수 없습니다: " + TARGET_SHEET_NAME);
+  }
+}
+
+
+/**
+ * 6. 셀 수정 시 실행되는 이벤트 핸들러
+ * @param {Event} e 수정 이벤트 객체
+ */
+function onEdit(e) {
+  if (!e || !e.range) return; // 이벤트 객체나 범위가 없으면 종료
+
+  const sheet = e.range.getSheet();
+  // 대상 시트가 아니면 종료
+  if (sheet.getName() !== TARGET_SHEET_NAME) return;
+
+  const row = e.range.getRow();
+  const col = e.range.getColumn();
+
+  // 헤더 행 수정 시 종료 (실수로 헤더 건드리는 것 방지)
+  if (row <= HEADER_ROW_COUNT) return;
+
+  // A1 전체 마지막 수정 시간 업데이트
+  sheet.getRange(HEADER_ROW_COUNT, COL_LAST_MODIFIED_ALL)
+       .setValue(new Date()); // 서식은 initializeSheet에서 이미 설정됨
+
+  // 수정된 셀이 퀘스트 영역(D열~L열)인 경우 서버별 수정 시간 업데이트
+  if (col >= QUEST_AREA_START_COL && col <= QUEST_AREA_END_COL) {
+    const [serverTimestampRange, serverName] = getServerInfo(sheet, row);
+    if (serverTimestampRange && serverName) {
+      // 서버 시간 기록 셀 (병합된 영역의 첫 번째 셀)에 현재 시간 기록
+      serverTimestampRange.getCell(1, 1).setValue(new Date());
+    }
+  }
+
+  // 수정된 열에 따라 기능 분기
+  if (PROGRESS_COLS.includes(col)) {
+    // 진행도 열 수정 시
+    updateProgress(sheet, e.range);
+  } else if (CHECKBOX_COLS.includes(col)) {
+    // 체크박스 열 수정 시 (체크하는 경우)
+    if (e.value === "TRUE") { // 체크박스가 'TRUE'로 변경될 때만 초기화 실행
+       handleCheckboxAction(sheet, e.range);
+    }
+  }
+
+  // 리셋 시간 업데이트 (모든 편집 시 실행 - 사용자의 의도)
+  // 주: 이 부분을 시간 기반 트리거로 옮기면 더 효율적일 수 있음
+  updateAllResetTimes(sheet);
+}
+
+/**
+ * 7. 주어진 행 번호가 속한 서버의 정보(시간 기록 셀 범위, 서버 이름) 반환
+ * @param {Sheet} sheet 대상 시트
+ * @param {number} row 현재 수정된 행 번호
+ * @returns {[Range|null, String|null]} [서버 시간 기록 셀 범위(C열), 서버 이름(B열)] 또는 [null, null]
+ */
+function getServerInfo(sheet, row) {
+  try {
+    // 해당 행이 어떤 서버 블록에 속하는지 계산 (3행 단위)
+    const serverBlockIndex = Math.floor((row - (HEADER_ROW_COUNT + 1)) / ROWS_PER_SERVER_BLOCK);
+    // 해당 행이 어떤 계정에 속하는지 계산
+    const accountIndex = Math.floor(serverBlockIndex / SERVERS.length);
+    // 계정 시작 행 계산
+    const accountStartRow = HEADER_ROW_COUNT + 1 + (accountIndex * SERVERS.length * ROWS_PER_SERVER_BLOCK);
+    // 실제 서버 시작 행 계산
+    const serverStartIndexInAccount = serverBlockIndex % SERVERS.length;
+    const serverStartRow = accountStartRow + serverStartIndexInAccount * ROWS_PER_SERVER_BLOCK;
+
+    // C열의 서버 시간 기록 셀 범위 (병합되어 있음)
+    const timestampRange = sheet.getRange(serverStartRow, COL_SERVER_TIMESTAMP, ROWS_PER_SERVER_BLOCK, 1);
+    // B열의 서버 이름 셀
+    const serverName = sheet.getRange(serverStartRow, COL_SERVER_NAME).getValue();
+    return [timestampRange, serverName];
+  } catch (error) {
+    console.error(`[Row ${row}] 서버 정보 조회 오류:`, error);
+    return [null, null];
+  }
+}

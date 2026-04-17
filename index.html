@@ -110,22 +110,29 @@ button{cursor:pointer;}
 .quest-hdr{padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--border);border-radius:var(--rlg) var(--rlg) 0 0;display:flex;align-items:center;}
 .quest-hdr-title{font-family:var(--ft);font-size:12px;letter-spacing:.08em;color:var(--gold);flex:1;}
 
-/* 4-col x 2-row quest grid */
+/* Quest grid: 4 cols, rows are independent per column */
 .quest-outer{padding:14px;}
-.quest-grid{display:grid;grid-template-columns:repeat(3,1fr) 220px;grid-template-rows:auto auto;gap:12px 14px;}
+.quest-grid{display:grid;grid-template-columns:repeat(3,1fr) 220px;gap:12px 14px;align-items:start;}
 /* col labels */
 .q-col-hdr{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border);text-align:center;margin-bottom:4px;}
-/* event column spans rows */
-.q-event-col{grid-column:4;grid-row:1/3;display:flex;flex-direction:column;gap:8px;}
+/* event column: does NOT span rows — just a normal cell in row 1 */
+.q-event-col{display:flex;flex-direction:column;gap:8px;}
+/* daily+weekly wrappers stack vertically within their column cell */
+.q-dw-col{display:flex;flex-direction:column;gap:12px;}
+.q-dw-section{display:flex;flex-direction:column;gap:8px;}
 .event-col-hdr{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px;}
 .event-fold-btn{background:none;border:none;color:var(--text3);font-size:12px;padding:0 3px;}
 .event-fold-btn:hover{color:var(--gold);}
 .event-body{display:flex;flex-direction:column;gap:6px;}
 .event-body.collapsed{display:none;}
-/* XP card */
-.xp-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
-.xp-label{font-size:12px;color:var(--text2);margin-bottom:7px;}
-.xp-inputs{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+/* XP inline in event header */
+.xp-inline{display:flex;align-items:center;gap:5px;font-family:var(--ft);font-size:13px;color:var(--gold);}
+.xp-inline .xp-val{cursor:pointer;}
+.xp-inline .xp-val:hover{color:var(--gold2);}
+.xp-inline .xp-edit{display:flex;align-items:center;gap:4px;}
+.xp-inline input{width:54px;font-family:var(--ft);font-size:13px;color:var(--gold);background:var(--bg2);border:1px solid var(--gold);border-radius:4px;padding:1px 4px;text-align:center;}
+.xp-pb-wrap{margin-top:4px;}
+/* old xp-card kept for reference but unused */
 .xp-inputs input{width:64px;font-size:13px;font-family:var(--ft);color:var(--gold);text-align:center;}
 .pb{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
 .pb-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .3s;}
@@ -227,7 +234,7 @@ button{cursor:pointer;}
 
 /* ── RATING PAGE ── */
 .rating-chart-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);padding:16px;margin-bottom:12px;}
-canvas#ratingCanvas{width:100%;height:180px;display:block;}
+canvas#ratingCanvas{width:100%;height:200px;display:block;}
 .rating-log{display:flex;flex-direction:column;gap:4px;max-height:320px;overflow-y:auto;}
 .rl-item{display:flex;align-items:center;gap:9px;padding:6px 11px;background:var(--bg3);border-radius:var(--r);font-size:13px;}
 .rl-date{color:var(--text3);font-size:11px;white-space:nowrap;}
@@ -286,13 +293,13 @@ canvas#ratingCanvas{width:100%;height:180px;display:block;}
 
 /* ── RESPONSIVE ── */
 @media(max-width:760px){
-  .quest-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;}
-  .q-event-col{grid-column:1/-1;grid-row:auto;}
+  .quest-grid{grid-template-columns:1fr 1fr;}
+  .q-event-col{grid-column:1/-1;}
   .opp-row{grid-template-columns:28px 40px 28px 1fr 1fr 1fr 44px;font-size:12px;}
 }
 @media(max-width:480px){
   .quest-grid{grid-template-columns:1fr;}
-  .q-event-col{grid-column:1;grid-row:auto;}
+  .q-event-col{grid-column:1;}
   .ng-grid{grid-template-columns:auto repeat(3,1fr);}
   .opp-row{grid-template-columns:26px 38px 26px 1fr 1fr 40px;font-size:11px;gap:3px;}
 }
@@ -558,7 +565,7 @@ const CLS_S={'전사':'전사','성기사':'기사','사냥꾼':'냥꾼','도적
 /* ════════ STATE ════════ */
 let curAcc='T',curSrv='NA',curPage='main';
 let qeCtx=null,mdCtx=null,hdIdx=null,rwCtx=null;
-let audienceCbChecked=false,foldedOpps=false,dragQiCtx=null,progEditCtx=null;
+let audienceCbChecked=false,foldedOpps=false,dragQiCtx=null,progEditCtx=null,xpEditField=null;
 let ratingFilter={acc:{T:true,H:true},srv:{NA:true,EU:true,ASIA:true}};
 let histFilter={acc:{T:true,H:true},srv:{NA:true,EU:true,ASIA:true},cls:null,dateFrom:'',dateTo:''};
 let memoDragSrc=null;
@@ -580,7 +587,7 @@ const getRatings=()=>gd(GK('ratings'),[]);
 const saveRatings=r=>sd(GK('ratings'),r);
 const getMemos=()=>gd(GK('memos'),[{id:'m1',title:'메모 1',body:''}]);
 const saveMemos=m=>sd(GK('memos'),m);
-const getXP=(a,s)=>gd(K(a,s,'xp'),{cur:0,max:0});
+const getXP=(a,s)=>gd(K(a,s,'xp'),{cur:0,max:4000});
 const saveXP=(a,s,x)=>sd(K(a,s,'xp'),x);
 const getEvCol=(a,s)=>gd(K(a,s,'evcol'),false);
 const saveEvCol=(a,s,v)=>sd(K(a,s,'evcol'),v);
@@ -680,8 +687,11 @@ function qiDL(){document.querySelectorAll('.qi').forEach(el=>el.classList.remove
 function qiDrop(e,a,s,type,toIdx){e.preventDefault();qiDL();if(!dragQiCtx||dragQiCtx.type!==type||dragQiCtx.idx===toIdx)return;const q=getQuests(a,s);const arr=q[type];const[m]=arr.splice(dragQiCtx.idx,1);arr.splice(toIdx,0,m);saveQuests(a,s,q);dragQiCtx=null;renderQuests();}
 function qiDE(){dragQiCtx=null;qiDL();}
 
-/* ════════ XP ════════ */
+/* XP */
 function setXPField(a,s,field,val){const x=getXP(a,s);x[field]=parseInt(val)||0;saveXP(a,s,x);renderQuests();}
+function startXPEdit(a,s,field){xpEditField={a,s,field};renderQuests();setTimeout(()=>{const el=document.getElementById(`xpe_${a}_${s}_${field}`);if(el){el.focus();el.select();}},0);}
+function commitXPEdit(a,s,field,el){const x=getXP(a,s);const v=parseInt(el.value);if(!isNaN(v))x[field]=Math.max(0,v);saveXP(a,s,x);xpEditField=null;renderQuests();}
+
 
 /* ════════ RATING ════════ */
 function saveRatingField(a,s,val){const m=getMeta(a,s);const p=parseFloat(val);if(!isNaN(p)){m.rating=p;saveMeta(a,s,m);const r=getRatings();r.push({val:p,acc:a,srv:s,at:new Date().toISOString()});saveRatings(r);}}
@@ -811,71 +821,57 @@ function renderQuests(){
   const xpPct=xp.max>0?Math.min(100,Math.round((xp.cur||0)/xp.max*100)):0;
   const evIcon=evCol?'▶':'▼';
 
+  // XP inline display: cur / max, double-click each to edit
+  function makeXPInline(){
+    const curEditing=xpEditField&&xpEditField.a===a&&xpEditField.s===s;
+    const curEl=curEditing&&xpEditField.field==='cur'
+      ?`<input id="xpe_${a}_${s}_cur" type="number" value="${xp.cur||0}" min="0"
+          onfocus="this.select()"
+          onblur="commitXPEdit('${a}','${s}','cur',this)"
+          onkeydown="if(event.key==='Enter')commitXPEdit('${a}','${s}','cur',this);if(event.key==='Escape'){xpEditField=null;renderQuests();}">`
+      :`<span class="xp-val" title="더블클릭으로 편집" ondblclick="startXPEdit('${a}','${s}','cur')">${xp.cur||0}</span>`;
+    const maxEl=curEditing&&xpEditField.field==='max'
+      ?`<input id="xpe_${a}_${s}_max" type="number" value="${xp.max||4000}" min="0"
+          onfocus="this.select()"
+          onblur="commitXPEdit('${a}','${s}','max',this)"
+          onkeydown="if(event.key==='Enter')commitXPEdit('${a}','${s}','max',this);if(event.key==='Escape'){xpEditField=null;renderQuests();}">`
+      :`<span class="xp-val" title="더블클릭으로 편집" ondblclick="startXPEdit('${a}','${s}','max')">${xp.max||4000}</span>`;
+    return `<div class="xp-inline">${curEl}<span class="prog-sep">/</span>${maxEl}</div>`;
+  }
+
+  // Col 1: daily[0] + weekly[0], Col 2: daily[1] + weekly[1], Col 3: daily[2] + weekly[2]
+  // Col 4: event (does not span rows)
+  function makeDWCol(colIdx){
+    const daily=q.daily[colIdx];const weekly=q.weekly[colIdx];
+    const dHdr=colIdx===0?`<div class="q-col-hdr">일일</div>`:`<div class="q-col-hdr" style="opacity:0">일일</div>`;
+    const wHdr=colIdx===0?`<div class="q-col-hdr">주간</div>`:`<div class="q-col-hdr" style="opacity:0">주간</div>`;
+    return `<div class="q-dw-col">
+      <div class="q-dw-section">
+        ${dHdr}
+        ${daily?makeQi(daily,'daily',colIdx):makeEmptySlot('daily')}
+      </div>
+      <div class="q-dw-section">
+        ${wHdr}
+        ${weekly?makeQi(weekly,'weekly',colIdx):makeEmptySlot('weekly')}
+      </div>
+    </div>`;
+  }
+
   document.getElementById('questGrid').innerHTML=`
-    <!-- Daily col 1 -->
-    <div>
-      <div class="q-col-hdr">일일</div>
-      <div style="display:flex;flex-direction:column;gap:8px" id="qs_daily_0">
-        ${q.daily[0]?makeQi(q.daily[0],'daily',0):makeEmptySlot('daily')}
-      </div>
-    </div>
-    <!-- Daily col 2 -->
-    <div>
-      <div class="q-col-hdr" style="opacity:0">일일</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        ${q.daily[1]?makeQi(q.daily[1],'daily',1):makeEmptySlot('daily')}
-      </div>
-    </div>
-    <!-- Daily col 3 -->
-    <div>
-      <div class="q-col-hdr" style="opacity:0">일일</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        ${q.daily[2]?makeQi(q.daily[2],'daily',2):makeEmptySlot('daily')}
-      </div>
-    </div>
-    <!-- Event col: rows 1+2 -->
+    ${makeDWCol(0)}
+    ${makeDWCol(1)}
+    ${makeDWCol(2)}
+    <!-- Event col -->
     <div class="q-event-col">
       <div class="event-col-hdr">
         <span>이벤트</span>
+        ${makeXPInline()}
         <button class="event-fold-btn" onclick="saveEvCol('${a}','${s}',!getEvCol('${a}','${s}'));renderQuests()">${evIcon}</button>
       </div>
-      <div class="xp-card">
-        <div class="xp-label">이벤트 XP</div>
-        <div class="xp-inputs">
-          <input type="number" value="${xp.cur||0}" placeholder="현재" onfocus="this.select()"
-            onchange="setXPField('${a}','${s}','cur',this.value)"
-            onkeydown="if(event.key==='Enter')this.blur()" style="width:64px;font-size:14px;font-family:var(--ft);color:var(--gold);text-align:center;">
-          <span class="prog-sep">/</span>
-          <input type="number" value="${xp.max||0}" placeholder="목표" onfocus="this.select()"
-            onchange="setXPField('${a}','${s}','max',this.value)"
-            onkeydown="if(event.key==='Enter')this.blur()" style="width:64px;font-size:14px;font-family:var(--ft);color:var(--gold);text-align:center;">
-        </div>
-        ${xp.max>0?`<div class="pb"><div class="pb-fill" style="width:${xpPct}%"></div></div>`:''}
-      </div>
+      ${xp.max>0?`<div class="xp-pb-wrap"><div class="pb"><div class="pb-fill" style="width:${xpPct}%"></div></div></div>`:''}
       <div class="${evCol?'event-body collapsed':'event-body'}">
         ${q.event.map((item,i)=>makeQi(item,'event',i)).join('')}
         ${makeEmptySlot('event')}
-      </div>
-    </div>
-    <!-- Weekly col 1 -->
-    <div>
-      <div class="q-col-hdr">주간</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        ${q.weekly[0]?makeQi(q.weekly[0],'weekly',0):makeEmptySlot('weekly')}
-      </div>
-    </div>
-    <!-- Weekly col 2 -->
-    <div>
-      <div class="q-col-hdr" style="opacity:0">주간</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        ${q.weekly[1]?makeQi(q.weekly[1],'weekly',1):makeEmptySlot('weekly')}
-      </div>
-    </div>
-    <!-- Weekly col 3 -->
-    <div>
-      <div class="q-col-hdr" style="opacity:0">주간</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        ${q.weekly[2]?makeQi(q.weekly[2],'weekly',2):makeEmptySlot('weekly')}
       </div>
     </div>
   `;
@@ -1007,21 +1003,54 @@ function renderRatingPage(){
 }
 function drawRatingChart(log){
   const canvas=document.getElementById('ratingCanvas');if(!canvas)return;
-  const dpr=window.devicePixelRatio||1;const W=Math.max(300,canvas.parentElement.clientWidth-32);const H=160;
+  const dpr=window.devicePixelRatio||1;const W=Math.max(300,canvas.parentElement.clientWidth-32);const H=200;
   canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';
   const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
   if(!log.length){ctx.fillStyle='rgba(106,90,72,.5)';ctx.font='13px Noto Sans KR';ctx.textAlign='center';ctx.fillText('평점을 기록하면 표시됩니다',W/2,H/2);return;}
-  const vals=log.map(r=>r.val);const mn=Math.min(...vals),mx=Math.max(...vals);
-  const pad=30,padB=24,padT=12;const gW=W-pad*2,gH=H-padB-padT;
-  const xStep=log.length>1?gW/(log.length-1):0;
-  const toX=i=>pad+i*xStep;const toY=v=>padT+gH-(mx===mn?gH/2:((v-mn)/(mx-mn))*gH);
+  // Group by acc+srv
+  const groups={};
+  ACCOUNTS.forEach(a=>SERVERS.forEach(s=>{
+    const key=`${a}_${s}`;const pts=log.filter(r=>r.acc===a&&r.srv===s).sort((x,y)=>x.at.localeCompare(y.at));
+    if(pts.length)groups[key]={acc:a,srv:s,pts};
+  }));
+  const colors={'T_NA':'#4a8fd4','T_EU':'#7ab4e8','T_ASIA':'#a8d0f0','H_NA':'#c8963e','H_EU':'#e0b870','H_ASIA':'#f0d090'};
+  const allVals=log.map(r=>r.val);const mn=Math.min(...allVals),mx=Math.max(...allVals);
+  const pad=38,padB=44,padT=12;const gW=W-pad*2,gH=H-padB-padT;
+  // X axis: global time range
+  const allTimes=log.map(r=>new Date(r.at).getTime());
+  const tMin=Math.min(...allTimes),tMax=Math.max(...allTimes);
+  const tRange=tMax-tMin||1;
+  const toX=t=>pad+(t-tMin)/tRange*gW;
+  const toY=v=>padT+gH-(mx===mn?gH/2:((v-mn)/(mx-mn))*gH);
+  // Grid lines
   ctx.strokeStyle='rgba(74,64,53,.4)';ctx.lineWidth=.7;
-  [0,.5,1].forEach(t=>{const y=padT+gH*(1-t);ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();
-    ctx.fillStyle='rgba(160,152,120,.7)';ctx.font='10px Noto Sans KR';ctx.textAlign='right';ctx.fillText(Math.round(mn+t*(mx-mn)),pad-3,y+3);});
-  for(let i=0;i<log.length-1;i++){ctx.beginPath();ctx.moveTo(toX(i),toY(vals[i]));ctx.lineTo(toX(i+1),toY(vals[i+1]));ctx.strokeStyle=log[i].acc==='T'?'rgba(74,143,212,.9)':'rgba(200,150,62,.9)';ctx.lineWidth=2;ctx.stroke();}
-  log.forEach((r,i)=>{ctx.beginPath();ctx.arc(toX(i),toY(r.val),3.5,0,Math.PI*2);ctx.fillStyle=r.acc==='T'?'#4a8fd4':'#c8963e';ctx.fill();});
-  const sIdxs=log.length<=5?log.map((_,i)=>i):[0,Math.floor(log.length/2),log.length-1];
-  sIdxs.forEach(i=>{const dt=new Date(log[i].at);ctx.fillStyle='rgba(106,90,72,.8)';ctx.font='10px Noto Sans KR';ctx.textAlign='center';ctx.fillText(`${dt.getMonth()+1}/${dt.getDate()}`,toX(i),H-padB+11);});
+  [0,.25,.5,.75,1].forEach(t=>{const y=padT+gH*(1-t);ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();
+    ctx.fillStyle='rgba(160,152,120,.7)';ctx.font='10px sans-serif';ctx.textAlign='right';ctx.fillText(Math.round(mn+t*(mx-mn)),pad-3,y+3);});
+  // Draw each group
+  Object.entries(groups).forEach(([key,{acc,srv,pts}])=>{
+    const color=colors[key]||'#aaa';
+    ctx.beginPath();ctx.moveTo(toX(new Date(pts[0].at).getTime()),toY(pts[0].val));
+    for(let i=1;i<pts.length;i++)ctx.lineTo(toX(new Date(pts[i].at).getTime()),toY(pts[i].val));
+    ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+    pts.forEach(r=>{ctx.beginPath();ctx.arc(toX(new Date(r.at).getTime()),toY(r.val),3.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();});
+    // Label at last point
+    if(pts.length){const last=pts[pts.length-1];const lx=toX(new Date(last.at).getTime());const ly=toY(last.val);
+      ctx.fillStyle=color;ctx.font='bold 10px sans-serif';ctx.textAlign=lx>W-pad-30?'right':'left';
+      ctx.fillText(`${acc}-${srv}`,lx+(lx>W-pad-30?-5:5),ly-5);}
+  });
+  // X axis date labels
+  const dateKeys=[...new Set(log.map(r=>r.at.slice(0,10)))].sort();
+  const showDates=dateKeys.length<=6?dateKeys:dateKeys.filter((_,i)=>i===0||i===dateKeys.length-1||i%Math.ceil(dateKeys.length/5)===0);
+  showDates.forEach(d=>{const pts2=log.filter(r=>r.at.startsWith(d));if(!pts2.length)return;
+    const tx=toX(new Date(pts2[0].at).getTime());
+    ctx.fillStyle='rgba(106,90,72,.8)';ctx.font='10px sans-serif';ctx.textAlign='center';
+    ctx.fillText(`${parseInt(d.slice(5,7))}/${parseInt(d.slice(8,10))}`,tx,H-padB+14);});
+  // Legend at bottom
+  const keys=Object.keys(groups);const legendY=H-12;let lx=pad;
+  keys.forEach(key=>{const{acc,srv}=groups[key];const color=colors[key];
+    ctx.fillStyle=color;ctx.fillRect(lx,legendY-8,10,8);
+    ctx.fillStyle='rgba(160,152,120,.9)';ctx.font='10px sans-serif';ctx.textAlign='left';
+    ctx.fillText(`${acc}-${srv}`,lx+13,legendY);lx+=58;});
 }
 
 /* ════════ RENDER: RECORDS ════════ */

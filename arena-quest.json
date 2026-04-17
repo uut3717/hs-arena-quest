@@ -1,0 +1,182 @@
+{
+  "hs4_T_EU_evcol": false,
+  "hs4_g_ratings": [
+    {
+      "val": 2805,
+      "acc": "H",
+      "srv": "EU",
+      "at": "2026-04-16T16:20:13.046Z"
+    },
+    {
+      "val": 1,
+      "acc": "T",
+      "srv": "ASIA",
+      "at": "2026-04-17T00:25:53.511Z"
+    },
+    {
+      "val": 1436,
+      "acc": "H",
+      "srv": "ASIA",
+      "at": "2026-04-17T00:26:29.705Z",
+      "label": "덱 시작 전"
+    },
+    {
+      "val": 5556,
+      "acc": "H",
+      "srv": "ASIA",
+      "at": "2026-04-17T00:26:30.705Z",
+      "label": "덱 완료 후"
+    }
+  ],
+  "hs4_T_ASIA_deck": null,
+  "hs4_T_ASIA_meta": {
+    "rating": 1
+  },
+  "hs4_H_EU_quests": {
+    "daily": [],
+    "weekly": [],
+    "event": []
+  },
+  "hs4_H_ASIA_deck": null,
+  "hs4_H_EU_meta": {
+    "rating": 2805
+  },
+  "hs4_T_EU_quests": {
+    "daily": [
+      {
+        "id": "q_1776385331117",
+        "text": "비전 지옥",
+        "target": 12,
+        "prog": 7,
+        "done": false
+      }
+    ],
+    "weekly": [],
+    "event": [
+      {
+        "id": "e1",
+        "text": "기본 모드 주문 400회",
+        "target": 400,
+        "prog": 25,
+        "done": false
+      },
+      {
+        "id": "q_1776385344692",
+        "text": "전설",
+        "target": 5,
+        "prog": 2,
+        "done": false
+      }
+    ]
+  },
+  "hs4_T_EU_deck": {
+    "id": "dk_1776383645231",
+    "acc": "T",
+    "srv": "EU",
+    "cls": "사제",
+    "myLeg": "영혼 거울",
+    "wins": 1,
+    "losses": 1,
+    "opponents": [
+      {
+        "id": "m_17763846797010.7467752723629519",
+        "result": "W",
+        "coin": "first",
+        "cls": "마법사",
+        "btag": "",
+        "oppLeg": "",
+        "note": "",
+        "matchAt": "2026-04-17T00:11:19.701Z"
+      },
+      {
+        "id": "m_17763836614050.7980460487567559",
+        "result": "L",
+        "coin": "second",
+        "cls": "도적",
+        "btag": "",
+        "oppLeg": "시네스트라",
+        "note": "",
+        "matchAt": "2026-04-16T23:54:21.405Z"
+      }
+    ],
+    "note": "",
+    "createdAt": "2026-04-16T23:54:05.231Z",
+    "reward": null
+  },
+  "hs4_g_history": [
+    {
+      "id": "dk_1776385580977",
+      "acc": "H",
+      "srv": "ASIA",
+      "cls": "죽음의기사",
+      "myLeg": "",
+      "wins": 6,
+      "losses": 3,
+      "opponents": [],
+      "note": "",
+      "createdAt": "2026-04-17T00:26:20.977Z",
+      "reward": {
+        "gold": 0,
+        "pack": 0,
+        "ticket": 0,
+        "audienceBonus": false,
+        "etc": ""
+      },
+      "reason": "complete",
+      "completedAt": "2026-04-17T00:26:30.705Z"
+    }
+  ],
+  "hs4_H_ASIA_meta": {
+    "rating": 5556
+  },
+  "hs4_T_ASIA_quests": {
+    "daily": [
+      {
+        "id": "d1",
+        "text": "야수 12장 내기",
+        "target": 12,
+        "prog": 0,
+        "done": false
+      },
+      {
+        "id": "d2",
+        "text": "도적/주술사/흑마 3판",
+        "target": 3,
+        "prog": 0,
+        "done": false
+      }
+    ],
+    "weekly": [
+      {
+        "id": "w1",
+        "text": "대격변 카드 75장",
+        "target": 75,
+        "prog": 0,
+        "done": false
+      },
+      {
+        "id": "w2",
+        "text": "아레나 5승",
+        "target": 5,
+        "prog": 0,
+        "done": false
+      },
+      {
+        "id": "w3",
+        "text": "하수인 파괴 25개",
+        "target": 25,
+        "prog": 0,
+        "done": false
+      }
+    ],
+    "event": [
+      {
+        "id": "e1",
+        "text": "기본 모드 주문 400회",
+        "target": 400,
+        "prog": 0,
+        "done": false
+      }
+    ]
+  }
+}

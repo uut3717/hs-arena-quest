@@ -392,6 +392,16 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
       <button class="btn gold" onclick="forceSyncToCloud()">☁ 지금 Drive에 저장</button>
       <button class="btn sm" style="margin-left:6px" onclick="loadFromCloud()">☁ Drive에서 불러오기</button>
     </div>
+    <div style="background:rgba(224,85,80,.08);border:1px solid rgba(224,85,80,.25);border-radius:var(--r);padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--text2)">
+      <div style="color:var(--loss);font-weight:700;margin-bottom:5px">⚠ Google 로그인 오류 (redirect_uri_mismatch) 해결법</div>
+      <div style="line-height:1.7">
+        1. <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--t-acc)">Google Cloud Console → 사용자 인증 정보</a> 접속<br>
+        2. OAuth 2.0 클라이언트 ID 클릭<br>
+        3. <b style="color:var(--text1)">승인된 JavaScript 원본</b>에 아래 주소 추가:<br>
+        <span style="font-family:monospace;background:var(--bg3);padding:2px 6px;border-radius:3px;color:var(--gold)" id="currentOrigin"></span><br>
+        4. 저장 후 5분 정도 대기
+      </div>
+    </div>
     <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
       <div style="font-size:13px;color:var(--text2);margin-bottom:8px">로컬 백업 (오프라인 사용)</div>
       <button class="btn sm" onclick="exportJSON()">JSON 내보내기</button>
@@ -1083,20 +1093,27 @@ function renderRecords(){
   window._filteredHist=filtered;
   const n=filtered.length,tg=filtered.reduce((s,h)=>s+(h.wins+h.losses),0),tw=filtered.reduce((s,h)=>s+h.wins,0);
   const avgW=n?(tw/n).toFixed(2):0,wPct=tg?Math.round(tw/tg*100):0,d12=filtered.filter(h=>h.wins>=12).length;
-  const tGold=filtered.reduce((s,h)=>s+(h.reward?.gold||0)+(h.reward?.audienceBonus?1000:0),0);
+  // Gold value: gold + audienceBonus(1000) + ticket*150 (pack = 0)
+  const calcGold=rew=>rew?(rew.gold||0)+(rew.audienceBonus?1000:0)+(rew.ticket||0)*150:0;
+  const tGold=filtered.reduce((s,h)=>s+calcGold(h.reward),0);
   document.getElementById('statsGrid').innerHTML=`
     <div class="scard"><div class="val">${n}</div><div class="lbl">총 덱</div></div>
     <div class="scard"><div class="val">${avgW}</div><div class="lbl">평균 승수</div></div>
     <div class="scard"><div class="val">${wPct}%</div><div class="lbl">게임 승률</div></div>
     <div class="scard"><div class="val">${d12}</div><div class="lbl">12승 덱</div></div>
-    <div class="scard"><div class="val">${tGold?tGold+'🪙':0}</div><div class="lbl">보상 골드</div></div>
+    <div class="scard"><div class="val">${tGold?tGold+'🪙':0}</div><div class="lbl">보상 골드환산</div></div>
     <div class="scard"><div class="val">${tg}</div><div class="lbl">총 게임</div></div>`;
   if(!n){document.getElementById('histTableWrap').innerHTML=`<div style="padding:24px;text-align:center;color:var(--text3)">기록 없음</div>`;return;}
   const rows=filtered.map((h,vi)=>{
     const sc=h.wins>=12?'g':h.wins>=7?'gr':'r';const cd=h.completedAt?new Date(h.completedAt).toLocaleDateString('ko-KR'):'';
-    const rew=h.reward;const rewStr=rew?[rew.gold?`🪙${rew.gold}`:'',rew.audienceBonus?'★':'',rew.pack?`📦${rew.pack}`:'',rew.ticket?`🎟${rew.ticket}`:'',rew.etc||''].filter(Boolean).join(' '):'—';
+    const rew=h.reward;
+    // 목록에선 골드 환산값만 표시
+    const goldVal=calcGold(rew);
+    const rewStr=rew?(goldVal?`🪙${goldVal}`+(rew.etc?` ${rew.etc}`:''):'—'):'—';
+    // 결과: 12승이면 "12승 N패", 아니면 "N승" (어차피 3패)
+    const resultStr=h.wins>=12?`${h.wins}승 ${h.losses}패`:`${h.wins}승`;
     return `<tr style="cursor:pointer" ondblclick="openHistDetail(${vi})">
-      <td><span class="hs ${sc}">${h.wins}-${h.losses}</span></td>
+      <td><span class="hs ${sc}">${resultStr}</span></td>
       <td><span class="acc-badge ${h.acc}">${h.acc}</span> <span style="font-size:11px;color:var(--text3)">${h.srv}</span></td>
       <td style="color:var(--text2)">${CLS_S[h.cls]||h.cls||'—'}</td>
       <td style="color:var(--text2);font-size:12px">${h.myLeg||'—'}</td>
@@ -1140,9 +1157,11 @@ function deleteHistFromDetail(){if(hdIdx===null)return;delHist(hdIdx);closePopup
 function renderMemoPage(){
   const memos=getMemos();
   document.getElementById('memoList').innerHTML=memos.map((m,i)=>`
-    <div class="memo-item" draggable="true" ondragstart="memoDragStart(event,${i})" ondragover="memoDragOver(event,${i})" ondrop="memoDrop(event,${i})" ondragend="memoDragEnd()">
+    <div class="memo-item" id="memo-item-${i}"
+      ondragover="memoDragOver(event,${i})" ondrop="memoDrop(event,${i})" ondragend="memoDragEnd()">
       <div class="memo-item-hdr">
-        <span class="memo-drag-handle">⠿</span>
+        <span class="memo-drag-handle" draggable="true"
+          ondragstart="memoDragStart(event,${i})" title="드래그하여 순서 변경">⠿</span>
         <input class="memo-title-inp" type="text" value="${(m.title||'').replace(/"/g,'&quot;')}" placeholder="제목" oninput="updateMemoField(${i},'title',this.value)">
         <button class="memo-del-btn" onclick="deleteMemoCard(${i})">✕</button>
       </div>
@@ -1180,6 +1199,9 @@ document.addEventListener('keydown',e=>{
 /* ════════ MAIN ════════ */
 function render(){renderNavGrid();renderResetTimers();renderDeck();renderQuests();}
 render();
+// Fill current origin for Google auth troubleshooting
+const originEl=document.getElementById('currentOrigin');
+if(originEl)originEl.textContent=location.origin;
 setInterval(renderResetTimers,60000);
 window.addEventListener('resize',()=>{if(curPage==='rating')drawRatingChart(getRatings().filter(r=>ratingFilter.acc[r.acc]&&ratingFilter.srv[r.srv]));});
 window.addEventListener('load',()=>initGSI());

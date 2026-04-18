@@ -416,7 +416,7 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
       <div class="pf"><label>골드</label><input type="number" id="rw_gold" placeholder="0" min="0" onkeydown="if(event.key==='Enter')saveReward()"></div>
       <div class="pf"><label>팩</label><input type="number" id="rw_pack" placeholder="0" min="0" onkeydown="if(event.key==='Enter')saveReward()"></div>
       <div class="pf"><label>입장권</label><input type="number" id="rw_ticket" placeholder="0" min="0" onkeydown="if(event.key==='Enter')saveReward()"></div>
-      <div class="pf"><label>기타</label><input type="text" id="rw_etc" placeholder="황금전설카드 등" onkeydown="if(event.key==='Enter')saveReward()"></div>
+      <div class="pf"><label>기타</label><input type="text" id="rw_etc" onkeydown="if(event.key==='Enter')saveReward()"></div>
     </div>
     <div class="pf" style="display:flex;align-items:center;gap:9px">
       <div id="audience_cb" onclick="toggleAudienceCb()" style="width:18px;height:18px;border:1.5px solid var(--border2);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
@@ -627,14 +627,27 @@ function finalizeDeck(a,s,reason,reward){
 function promptReward(a,s){
   rwCtx={a,s};
   ['rw_gold','rw_pack','rw_ticket','rw_etc','rw_rating_before','rw_rating_after'].forEach(id=>document.getElementById(id).value='');
-  const m=getMeta(a,s);if(m.rating)document.getElementById('rw_rating_before').value=m.rating;
+  const m=getMeta(a,s);
+  const rating=m.rating||'';
+  if(rating){
+    document.getElementById('rw_rating_before').value=rating;
+    document.getElementById('rw_rating_after').value=rating;  // 완료 후도 기본값으로 채움
+  }
   audienceCbChecked=false;updateAudienceCb();
   showPopup('rewardPopup');
   setTimeout(()=>{
     document.getElementById('rw_gold').focus();
-    // 골드 휠: 5단위
-    const goldEl=document.getElementById('rw_gold');
-    goldEl.onwheel=e=>{e.preventDefault();const v=parseInt(goldEl.value)||0;goldEl.value=Math.max(0,v+(e.deltaY<0?5:-5));};
+    // 휠 헬퍼
+    function attachWheel(id,step){
+      const el=document.getElementById(id);
+      if(!el)return;
+      el.onwheel=e=>{e.preventDefault();const v=parseFloat(el.value)||0;el.value=Math.max(0,v+(e.deltaY<0?step:-step));};
+    }
+    attachWheel('rw_gold',5);
+    attachWheel('rw_pack',1);
+    attachWheel('rw_ticket',1);
+    attachWheel('rw_rating_before',1);
+    attachWheel('rw_rating_after',1);
   },50);
 }
 function toggleAudienceCb(){audienceCbChecked=!audienceCbChecked;updateAudienceCb();}
@@ -712,7 +725,7 @@ function qiDE(){dragQiCtx=null;qiDL();}
 function setXPField(a,s,field,val){const x=getXP(a,s);x[field]=Math.max(0,parseInt(val)||0);saveXP(a,s,x);renderQuests();}
 function startXPEdit(a,s,field){xpEditField={a,s,field};renderQuests();setTimeout(()=>{const el=document.getElementById(`xpe_${a}_${s}_${field}`);if(el){el.focus();el.select();}},0);}
 function commitXPEdit(a,s,field,el){const x=getXP(a,s);const v=parseInt(el.value);if(!isNaN(v))x[field]=Math.max(0,v);saveXP(a,s,x);xpEditField=null;renderQuests();}
-function xpWheel(e,a,s){e.preventDefault();const x=getXP(a,s);const step=e.deltaY<0?1:-1;x.cur=Math.max(0,Math.min(x.max||99999,(x.cur||0)+step*50));saveXP(a,s,x);renderQuests();}
+function xpWheel(e,a,s){e.preventDefault();const x=getXP(a,s);const step=e.deltaY<0?1:-1;x.cur=Math.max(0,Math.min(x.max||99999,(x.cur||0)+step));saveXP(a,s,x);renderQuests();}
 
 
 /* ════════ RATING ════════ */

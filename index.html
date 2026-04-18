@@ -166,9 +166,9 @@ button{cursor:pointer;}
 /* ── DECK SECTION ── */
 .deck-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;position:relative;margin-bottom:8px;}
 .deck-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
-.deck-hdr{padding:11px 15px 9px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.deck-hdr{padding:9px 15px 7px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
 .class-sel{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:5px 8px;font-size:14px;min-width:76px;}
-.deck-my-legend{flex:1;font-size:13px;color:var(--text2);min-width:100px;}
+.deck-my-legend{font-size:13px;color:var(--text2);width:180px;flex-shrink:0;}
 .deck-my-legend::placeholder{color:var(--text3);}
 .deck-badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
 .deck-badge.active{background:rgba(77,184,112,.15);color:var(--win);border:1px solid rgba(77,184,112,.3);}
@@ -203,8 +203,8 @@ button{cursor:pointer;}
 .score-sep{font-family:var(--ft);font-size:22px;color:var(--text3);}
 .score-btns-row{display:flex;align-items:center;gap:18px;}
 /* Deck note */
-.deck-note-wrap{padding:0 15px 10px;}
-.deck-note{width:100%;min-height:52px;color:var(--text2);font-size:13px;}
+.deck-note-wrap{padding:0 15px 8px;}
+.deck-note{width:100%;min-height:36px;max-height:80px;color:var(--text2);font-size:13px;}
 .deck-note::placeholder{color:var(--text3);}
 .deck-note:focus{color:var(--text1);}
 /* Match */
@@ -1037,14 +1037,14 @@ function renderDeck(){
   area.innerHTML=`<div class="deck-card">
     ${overlay}
     <div class="deck-hdr">
-      <input class="deck-my-legend" type="text" placeholder="내 전설 카드" value="${(dk.myLeg||'').replace(/"/g,'&quot;')}"
-        oninput="updateDeckField('${a}','${s}','myLeg',this.value)">
       <span class="deck-badge ${isComplete?(dk.wins>=MAX_W?'done-win':'done-loss'):'active'}">${isComplete?(dk.wins>=MAX_W?'12승':'3패'):'진행중'}</span>
       <span style="font-size:11px;color:var(--text3);margin-left:auto">${new Date(dk.createdAt).toLocaleDateString('ko-KR')}</span>
     </div>
     <div class="score-wrap">
       <div class="score-cls-row">
         <select class="class-sel" onchange="updateDeckField('${a}','${s}','cls',this.value)">${clsOpts}</select>
+        <input class="deck-my-legend" type="text" placeholder="내 전설 카드" value="${(dk.myLeg||'').replace(/"/g,'&quot;')}"
+          oninput="updateDeckField('${a}','${s}','myLeg',this.value)">
         <div class="score-count">
           <span class="score-cnt wc">${dk.wins}승</span>
           <span class="score-cnt lc">${dk.losses}패</span>

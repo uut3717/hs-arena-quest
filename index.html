@@ -213,26 +213,24 @@ button{cursor:pointer;}
 .opp-title{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}
 .opp-fold-btn{font-size:11px;color:var(--text3);background:none;border:none;padding:2px 6px;}
 .opp-fold-btn:hover{color:var(--text2);}
-/* Match row: 2-line layout on PC, key info prominent */
-.opp-row{display:grid;grid-template-columns:36px 64px 36px 1fr 1fr 80px;gap:0 6px;align-items:center;padding:6px 10px;border-top:1px solid var(--border);font-size:13px;}
+/* Match row: 2줄 레이아웃 */
+.opp-row{display:flex;flex-direction:column;gap:0;padding:7px 10px;border-top:1px solid var(--border);}
 .opp-row:hover{background:var(--bg3);}
-.opp-coin{text-align:center;cursor:pointer;font-size:15px;font-weight:700;user-select:none;}
+.opp-row-main{display:flex;align-items:center;gap:8px;}
+.opp-row-sub{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:5px;margin-top:5px;padding-left:4px;}
+.opp-coin{text-align:center;cursor:pointer;font-size:15px;font-weight:700;user-select:none;flex-shrink:0;width:28px;}
 .opp-coin.first{color:#4a8fd4;}
 .opp-coin.second{color:#c8963e;}
-.opp-cls-sel{font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:4px 5px;width:100%;text-align:center;font-weight:600;}
+.opp-cls-sel{font-size:14px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:4px 6px;font-weight:600;flex:1;}
 .opp-cls-sel:focus{border-color:var(--gold);outline:none;}
-.opp-result-tog{text-align:center;font-size:14px;font-weight:700;padding:4px 4px;border-radius:4px;cursor:pointer;user-select:none;min-width:32px;}
+.opp-result-tog{text-align:center;font-size:15px;font-weight:700;padding:4px 8px;border-radius:4px;cursor:pointer;user-select:none;flex-shrink:0;}
 .opp-result-tog.W{background:rgba(77,184,112,.2);color:var(--win);}
 .opp-result-tog.L{background:rgba(224,85,80,.15);color:var(--loss);}
 .opp-result-tog.Q{background:var(--bg3);color:var(--text3);border:1px dashed var(--border);}
-/* secondary fields: stacked in one cell */
-.opp-secondary{display:flex;flex-direction:column;gap:2px;min-width:0;}
-.opp-inp{font-size:11px;background:var(--bg3);border:none;border-radius:3px;padding:2px 5px;width:100%;color:var(--text2);}
+.opp-date-sm{font-size:10px;color:var(--text3);white-space:nowrap;margin-left:auto;flex-shrink:0;}
+.opp-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:4px 7px;width:100%;color:var(--text2);}
 .opp-inp::placeholder{color:var(--text3);}
 .opp-inp:focus{outline:1px solid var(--gold);color:var(--text1);}
-.opp-date{font-size:10px;color:var(--text3);text-align:right;white-space:nowrap;line-height:1.3;}
-/* Match sequence pips */
-.match-seq{display:flex;gap:3px;flex-wrap:wrap;padding:4px 15px 0;}
 
 /* Complete overlay */
 .complete-overlay{position:absolute;inset:0;background:rgba(26,23,18,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;border-radius:var(--rlg);backdrop-filter:blur(3px);z-index:10;}
@@ -289,7 +287,15 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
 .memo-add-btn{width:100%;padding:9px;background:none;border:1px dashed var(--border);border-radius:var(--rlg);cursor:pointer;font-size:13px;color:var(--text3);}
 .memo-add-btn:hover{color:var(--gold);border-color:var(--gold);}
 
-/* ── DATA PAGE ── */
+/* ── LOGIN OVERLAY ── */
+.login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:9999;}
+.login-overlay.hidden{display:none;}
+.login-logo{font-family:var(--ft);font-size:32px;font-weight:700;color:var(--gold);letter-spacing:.12em;text-shadow:0 0 30px rgba(200,168,75,.3);}
+.login-sub{font-size:14px;color:var(--text2);margin-top:-10px;}
+.login-btn{padding:11px 28px;background:white;color:#333;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;transition:opacity .15s;}
+.login-btn:hover{opacity:.9;}
+.login-btn svg{width:20px;height:20px;}
+.login-err{font-size:13px;color:var(--loss);min-height:18px;}
 .data-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);padding:20px;max-width:520px;}
 .data-card h3{font-family:var(--ft);color:var(--gold);font-size:14px;margin-bottom:16px;letter-spacing:.05em;}
 
@@ -308,18 +314,28 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
 @media(max-width:760px){
   .quest-grid{grid-template-columns:1fr 1fr;}
   .q-event-col{grid-column:1/-1;}
-  .opp-row{grid-template-columns:30px 56px 30px 1fr 70px;font-size:12px;}
+  .opp-row-sub{grid-template-columns:1fr 1fr;}
 }
 @media(max-width:480px){
   .quest-grid{grid-template-columns:1fr;}
   .q-event-col{grid-column:1;}
   .ng-grid{grid-template-columns:auto repeat(3,1fr);}
-  .opp-row{grid-template-columns:28px 52px 28px 1fr 60px;font-size:11px;gap:3px;}
+  .opp-row-sub{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
-<div class="app">
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-logo">ARENA QUEST</div>
+  <div class="login-sub">헤스스톤 아레나 트래커</div>
+  <button class="login-btn" id="loginBtn" onclick="handleAuth()">
+    <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    Google로 로그인
+  </button>
+  <div class="login-err" id="loginErr"></div>
+  <div style="font-size:12px;color:var(--text3);text-align:center;max-width:280px;line-height:1.6">로그인하면 Google Drive에 데이터가 자동 저장되어<br>어떤 기기에서도 이어서 사용할 수 있습니다</div>
+</div>
+<div class="app" id="appRoot" style="display:none">
 
 <!-- HEADER -->
 <div class="hdr">
@@ -329,7 +345,7 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
       <div class="sync-dot" id="syncDot"></div>
       <span id="syncLabel">로그인 필요</span>
     </div>
-    <button class="btn sm" id="authBtn" onclick="handleAuth()">Google 로그인</button>
+    <button class="btn sm" id="authBtn" onclick="handleAuth()" style="display:none">로그아웃</button>
     <div class="hdr-btns">
       <button class="btn sm nav-active" id="nav-main" onclick="showPage('main')">덱/퀘스트</button>
       <button class="btn sm" id="nav-rating" onclick="showPage('rating')">📈 평점</button>
@@ -500,32 +516,47 @@ function setSyncStatus(s,msg){
   const dot=document.getElementById('syncDot');const lbl=document.getElementById('syncLabel');
   dot.className='sync-dot'+(s?' '+s:'');lbl.textContent=msg;
 }
+function showApp(){
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('appRoot').style.display='';
+  const btn=document.getElementById('authBtn');
+  btn.style.display='';btn.textContent='로그아웃';
+}
+function showLogin(errMsg){
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('appRoot').style.display='none';
+  document.getElementById('loginErr').textContent=errMsg||'';
+}
 function initGSI(){
   if(typeof google==='undefined'||!google.accounts){setTimeout(initGSI,200);return;}
   tokenClient=google.accounts.oauth2.initTokenClient({
     client_id:CLIENT_ID,scope:SCOPES,
     callback:async r=>{
-      if(r.error){setSyncStatus('err','로그인 실패: '+r.error);return;}
+      if(r.error){showLogin('로그인 실패: '+r.error);setSyncStatus('err','로그인 실패');return;}
       gToken=r.access_token;
       document.getElementById('authBtn').textContent='로그아웃';
-      setSyncStatus('spin','동기화 중...');
+      setSyncStatus('spin','Drive에서 불러오는 중...');
       await loadFromCloud();
       render();
+      showApp();
       setSyncStatus('ok','Drive 연동됨');
     }
   });
-  // 저장된 토큰은 만료될 수 있으므로 자동 재사용 안 함 — 로그인 버튼 눌러야 함
-  setSyncStatus('','로그인 필요');
+  // GSI 로드되면 바로 로그인 시도 (이미 Google 세션 있으면 팝업 없이 바로 됨)
+  showLogin('');
+  tokenClient.requestAccessToken();
 }
 function handleAuth(){
   if(gToken){
     gToken=null;
     document.getElementById('authBtn').textContent='Google 로그인';
     setSyncStatus('','로그인 필요');
+    showLogin('');
+    // 바로 다시 로그인 요청
+    if(tokenClient)tokenClient.requestAccessToken();
     return;
   }
-  if(!tokenClient){alert('잠시 후 다시 시도하세요.');return;}
-  // prompt 생략하면 Google이 자동으로 최적 방식 선택 (popup 방식, redirect 없음)
+  if(!tokenClient){return;}
   tokenClient.requestAccessToken();
 }
 async function apiReq(method,url,body,contentType){
@@ -963,12 +994,15 @@ function renderDeck(){
     const resLbl=m.result==='W'?'승':m.result==='L'?'패':'?';
     const dt=m.matchAt?new Date(m.matchAt).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
     return `<div class="opp-row">
-      <span class="opp-coin ${coinCls}" onclick="toggleMatchCoin('${a}','${s}',${i})" title="선/후 전환">${coinLbl}</span>
-      <select class="opp-cls-sel" onchange="updateMatch('${a}','${s}',${i},'cls',this.value)">
-        <option value="">—</option>${CLS_ORDER.map(c=>`<option value="${c}"${c===m.cls?' selected':''}>${CLS_S[c]||c}</option>`).join('')}
-      </select>
-      <span class="opp-result-tog ${resCls}" onclick="toggleMatchResult('${a}','${s}',${i})" title="클릭 전환">${resLbl}</span>
-      <div class="opp-secondary">
+      <div class="opp-row-main">
+        <span class="opp-coin ${coinCls}" onclick="toggleMatchCoin('${a}','${s}',${i})" title="선/후 전환">${coinLbl}</span>
+        <select class="opp-cls-sel" onchange="updateMatch('${a}','${s}',${i},'cls',this.value)">
+          <option value="">—</option>${CLS_ORDER.map(c=>`<option value="${c}"${c===m.cls?' selected':''}>${CLS_S[c]||c}</option>`).join('')}
+        </select>
+        <span class="opp-result-tog ${resCls}" onclick="toggleMatchResult('${a}','${s}',${i})" title="클릭 전환">${resLbl}</span>
+        <span class="opp-date-sm">${dt}</span>
+      </div>
+      <div class="opp-row-sub">
         <input class="opp-inp" type="text" placeholder="배틀태그" value="${(m.btag||'').replace(/"/g,'&quot;')}"
           oninput="updateMatch('${a}','${s}',${i},'btag',this.value)">
         <input class="opp-inp" type="text" placeholder="상대 전설" value="${(m.oppLeg||'').replace(/"/g,'&quot;')}"
@@ -976,7 +1010,6 @@ function renderDeck(){
         <input class="opp-inp" type="text" placeholder="메모" value="${(m.note||'').replace(/"/g,'&quot;')}"
           oninput="updateMatch('${a}','${s}',${i},'note',this.value)">
       </div>
-      <div class="opp-date">${dt}</div>
     </div>`;
   }).join('');
   const foldBtn=opps.length>3?`<button class="opp-fold-btn" onclick="foldedOpps=!foldedOpps;renderDeck()">${foldedOpps?`펼치기(${opps.length})`: '접기'}</button>`:'';
@@ -1041,9 +1074,9 @@ function renderDeck(){
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
         ${foldBtn}
       </div>
-      <div style="font-size:11px;color:var(--text3);padding:0 10px 4px;display:grid;grid-template-columns:36px 64px 36px 1fr 80px;gap:0 6px">
-        <span style="text-align:center">선/후</span><span style="text-align:center">클래스</span><span style="text-align:center">결과</span>
-        <span>배틀태그 / 전설 / 메모</span><span style="text-align:right">시간</span>
+      <div style="font-size:11px;color:var(--text3);padding:0 10px 2px;display:flex;gap:8px">
+        <span style="width:28px;text-align:center">선/후</span>
+        <span style="flex:1">클래스 · 결과</span>
       </div>
       <div>${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>
     </div>
@@ -1263,11 +1296,10 @@ document.addEventListener('keydown',e=>{
 
 /* ════════ MAIN ════════ */
 function render(){renderNavGrid();renderResetTimers();renderDeck();renderQuests();}
-render();
-// Fill current origin for Google auth troubleshooting
+// 앱은 로그인 후에만 표시 — 초기 render() 호출 없음
 const originEl=document.getElementById('currentOrigin');
 if(originEl)originEl.textContent=location.origin;
-setInterval(renderResetTimers,60000);
+setInterval(()=>{if(gToken)renderResetTimers();},60000);
 window.addEventListener('resize',()=>{if(curPage==='rating')drawRatingChart(getRatings().filter(r=>ratingFilter.acc[r.acc]&&ratingFilter.srv[r.srv]));});
 window.addEventListener('load',()=>initGSI());
 </script>

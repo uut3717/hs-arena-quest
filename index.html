@@ -443,7 +443,7 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
 <div class="popup-bg" id="questEditPopup" style="display:none" onclick="if(event.target===this)closePopup('questEditPopup')">
   <div class="popup">
     <h3>퀘스트 편집</h3>
-    <div class="pf"><label>퀘스트 이름</label><input type="text" id="qe_text" onkeydown="if(event.key==='Enter')saveQuestEdit()"></div>
+    <div class="pf"><label>퀘스트 이름</label><input type="text" id="qe_text" lang="ko" style="ime-mode:active" onkeydown="if(event.key==='Enter')saveQuestEdit()"></div>
     <div class="pf"><label>목표 수치 (0이면 체크박스만)</label><input type="number" id="qe_target" min="0" value="0" onkeydown="if(event.key==='Enter')saveQuestEdit()"></div>
     <div class="pbtn-row">
       <button class="btn red sm" onclick="deleteQuestItem()">삭제</button>
@@ -677,6 +677,11 @@ function deleteMatchFromPopup(){if(!mdCtx)return;const{a,s,idx}=mdCtx;const dk=g
 
 /* ════════ QUEST OPS ════════ */
 function toggleQuest(a,s,type,idx){const q=getQuests(a,s);const item=q[type][idx];if(item.target>0){item.prog=item.prog>=item.target?0:item.target;item.done=item.prog>=item.target;}else item.done=!item.done;saveQuests(a,s,q);renderQuests();}
+function focusKoreanInput(el){
+  // blur → focus 사이클로 OS 기본 IME(한국어) 활성화
+  el.blur();
+  setTimeout(()=>{el.focus();el.select();},80);
+}
 function addQuestItem(a,s,type,idx){
   const q=getQuests(a,s);
   if(idx!==undefined&&idx<q[type].length){}// replace empty slot — just add normally
@@ -685,9 +690,9 @@ function addQuestItem(a,s,type,idx){
   // immediately open edit
   qeCtx={a,s,type,idx:q[type].length-1};
   document.getElementById('qe_text').value='새 퀘스트';document.getElementById('qe_target').value=0;
-  showPopup('questEditPopup');setTimeout(()=>{document.getElementById('qe_text').select();},50);
+  showPopup('questEditPopup');setTimeout(()=>{const el=document.getElementById('qe_text');el.select();focusKoreanInput(el);},50);
 }
-function openQuestEdit(a,s,type,idx){const q=getQuests(a,s);qeCtx={a,s,type,idx};document.getElementById('qe_text').value=q[type][idx].text;document.getElementById('qe_target').value=q[type][idx].target;showPopup('questEditPopup');setTimeout(()=>document.getElementById('qe_text').focus(),50);}
+function openQuestEdit(a,s,type,idx){const q=getQuests(a,s);qeCtx={a,s,type,idx};document.getElementById('qe_text').value=q[type][idx].text;document.getElementById('qe_target').value=q[type][idx].target;showPopup('questEditPopup');setTimeout(()=>focusKoreanInput(document.getElementById('qe_text')),50);}
 function saveQuestEdit(){if(!qeCtx)return;const{a,s,type,idx}=qeCtx;const q=getQuests(a,s);q[type][idx].text=document.getElementById('qe_text').value.trim()||'퀘스트';q[type][idx].target=parseInt(document.getElementById('qe_target').value)||0;if(!q[type][idx].target)q[type][idx].prog=0;saveQuests(a,s,q);closePopup('questEditPopup');renderQuests();}
 function deleteQuestItem(){if(!qeCtx)return;const{a,s,type,idx}=qeCtx;const q=getQuests(a,s);q[type].splice(idx,1);saveQuests(a,s,q);closePopup('questEditPopup');renderQuests();}
 function deleteQuestDirect(a,s,type,idx){const q=getQuests(a,s);q[type].splice(idx,1);saveQuests(a,s,q);renderQuests();}

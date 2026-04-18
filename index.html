@@ -100,10 +100,9 @@ button{cursor:pointer;}
 .ng-rating.h-rating{border-bottom-color:var(--h-acc);}
 .ng-rating.active-rating{border-color:var(--acc);border-top:none;}
 
-/* Reset timers strip */
-.reset-strip{display:flex;gap:8px;margin-bottom:.8rem;flex-wrap:wrap;}
-.reset-chip{font-size:12px;color:var(--text3);background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:4px 10px;}
-.reset-chip span{color:var(--text2);}
+/* Reset timer — compact inline under active tab */
+.reset-inline{font-size:11px;color:var(--text3);text-align:center;padding:2px 0 0;line-height:1;}
+.reset-inline span{color:var(--gold);font-family:var(--ft);font-size:12px;}
 
 /* ── QUEST SECTION ── */
 .quest-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);overflow:visible;margin-bottom:12px;}
@@ -331,8 +330,6 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
 <div id="pageMain" class="page active">
   <!-- Account+Server nav with inline rating -->
   <div id="navGrid" style="margin-bottom:.8rem;"></div>
-  <!-- Reset timers -->
-  <div class="reset-strip" id="resetStrip"></div>
   <!-- Quests -->
   <div class="quest-section">
     <div class="quest-hdr">
@@ -630,11 +627,15 @@ function finalizeDeck(a,s,reason,reward){
 function promptReward(a,s){
   rwCtx={a,s};
   ['rw_gold','rw_pack','rw_ticket','rw_etc','rw_rating_before','rw_rating_after'].forEach(id=>document.getElementById(id).value='');
-  // Pre-fill rating_before from current meta
   const m=getMeta(a,s);if(m.rating)document.getElementById('rw_rating_before').value=m.rating;
   audienceCbChecked=false;updateAudienceCb();
   showPopup('rewardPopup');
-  setTimeout(()=>document.getElementById('rw_gold').focus(),50);
+  setTimeout(()=>{
+    document.getElementById('rw_gold').focus();
+    // 골드 휠: 5단위
+    const goldEl=document.getElementById('rw_gold');
+    goldEl.onwheel=e=>{e.preventDefault();const v=parseInt(goldEl.value)||0;goldEl.value=Math.max(0,v+(e.deltaY<0?5:-5));};
+  },50);
 }
 function toggleAudienceCb(){audienceCbChecked=!audienceCbChecked;updateAudienceCb();}
 function updateAudienceCb(){
@@ -708,9 +709,10 @@ function qiDrop(e,a,s,type,toIdx){e.preventDefault();qiDL();if(!dragQiCtx||dragQ
 function qiDE(){dragQiCtx=null;qiDL();}
 
 /* XP */
-function setXPField(a,s,field,val){const x=getXP(a,s);x[field]=parseInt(val)||0;saveXP(a,s,x);renderQuests();}
+function setXPField(a,s,field,val){const x=getXP(a,s);x[field]=Math.max(0,parseInt(val)||0);saveXP(a,s,x);renderQuests();}
 function startXPEdit(a,s,field){xpEditField={a,s,field};renderQuests();setTimeout(()=>{const el=document.getElementById(`xpe_${a}_${s}_${field}`);if(el){el.focus();el.select();}},0);}
 function commitXPEdit(a,s,field,el){const x=getXP(a,s);const v=parseInt(el.value);if(!isNaN(v))x[field]=Math.max(0,v);saveXP(a,s,x);xpEditField=null;renderQuests();}
+function xpWheel(e,a,s){e.preventDefault();const x=getXP(a,s);const step=e.deltaY<0?1:-1;x.cur=Math.max(0,Math.min(x.max||99999,(x.cur||0)+step*50));saveXP(a,s,x);renderQuests();}
 
 
 /* ════════ RATING ════════ */
@@ -736,6 +738,12 @@ function importJSON(input){const file=input.files[0];if(!file)return;const reade
   Layout: [T] [NA_tab/rating] [EU_tab/rating] [ASIA_tab/rating] | [H] [NA_tab/rating] [EU_tab/rating] [ASIA_tab/rating]
 */
 function renderNavGrid(){
+  const now=new Date();const krH=(now.getUTCHours()+9)%24;const krM=now.getUTCMinutes();
+  function resetStr(s){
+    const rh=RESET_KST[s];let hl=rh-krH;let ml=60-krM;
+    if(ml===60)ml=0;else hl-=1;if(hl<0)hl+=24;
+    return `${hl}:${String(ml).padStart(2,'0')}`;
+  }
   let h=`<div style="display:flex;align-items:flex-start;gap:0;flex-wrap:wrap">`;
   ACCOUNTS.forEach((a,ai)=>{
     const accColor=a==='T'?'var(--t-acc)':'var(--h-acc)';
@@ -749,13 +757,16 @@ function renderNavGrid(){
         <button class="stab acc-${a}${isActive?' active':''}" onclick="curAcc='${a}';curSrv='${s}';foldedOpps=false;render()">
           <span class="dot${getDeck(a,s)?' has-deck':''}"></span>${s}
         </button>
-        <div style="border:1px solid ${isActive?'var(--acc)':'var(--border)'};border-top:none;border-radius:0 0 var(--r) var(--r);background:var(--bg2);padding:3px 6px;display:flex;align-items:center;gap:3px;">
-          <span style="width:7px;height:7px;border-radius:50%;background:${accColor};flex-shrink:0;display:inline-block;"></span>
-          <input type="number" value="${m.rating||''}" placeholder="—"
-            onfocus="this.select()"
-            onchange="saveRatingField('${a}','${s}',this.value);renderNavGrid()"
-            onkeydown="if(event.key==='Enter')this.blur()"
-            style="background:none;border:none;padding:2px 0;width:52px;font-size:13px;font-family:var(--ft);color:var(--gold);text-align:center;outline:none">
+        <div style="border:1px solid ${isActive?'var(--acc)':'var(--border)'};border-top:none;border-radius:0 0 var(--r) var(--r);background:var(--bg2);padding:3px 6px;display:flex;flex-direction:column;align-items:center;gap:1px;">
+          <div style="display:flex;align-items:center;gap:3px;width:100%;">
+            <span style="width:7px;height:7px;border-radius:50%;background:${accColor};flex-shrink:0;display:inline-block;"></span>
+            <input type="number" value="${m.rating||''}" placeholder="—"
+              onfocus="this.select()"
+              onchange="saveRatingField('${a}','${s}',this.value);renderNavGrid()"
+              onkeydown="if(event.key==='Enter')this.blur()"
+              style="background:none;border:none;padding:2px 0;width:52px;font-size:13px;font-family:var(--ft);color:var(--gold);text-align:center;outline:none">
+          </div>
+          ${isActive?`<div class="reset-inline">리셋 <span id="resetTimer">${resetStr(s)}</span></div>`:''}
         </div>
       </div>`;
     });
@@ -768,11 +779,10 @@ function renderNavGrid(){
 /* ════════ RESET TIMERS ════════ */
 function renderResetTimers(){
   const now=new Date();const krH=(now.getUTCHours()+9)%24;const krM=now.getUTCMinutes();
-  document.getElementById('resetStrip').innerHTML=SERVERS.map(s=>{
-    const rh=RESET_KST[s];let hl=rh-krH;let ml=60-krM;
-    if(ml===60)ml=0;else hl-=1;if(hl<0)hl+=24;
-    return `<div class="reset-chip">${s} 리셋 <span>${hl}:${String(ml).padStart(2,'0')}</span></div>`;
-  }).join('');
+  const rh=RESET_KST[curSrv];let hl=rh-krH;let ml=60-krM;
+  if(ml===60)ml=0;else hl-=1;if(hl<0)hl+=24;
+  const el=document.getElementById('resetTimer');
+  if(el)el.textContent=`${hl}:${String(ml).padStart(2,'0')}`;
 }
 
 /* ════════ RENDER: QUESTS ════════ */
@@ -841,7 +851,7 @@ function renderQuests(){
   const xpPct=xp.max>0?Math.min(100,Math.round((xp.cur||0)/xp.max*100)):0;
   const evIcon=evCol?'▶':'▼';
 
-  // XP inline display: cur / max, double-click each to edit
+  // XP inline display: cur / max, click to edit, wheel on cur to adjust
   function makeXPInline(){
     const curEditing=xpEditField&&xpEditField.a===a&&xpEditField.s===s;
     const curEl=curEditing&&xpEditField.field==='cur'
@@ -849,14 +859,14 @@ function renderQuests(){
           onfocus="this.select()"
           onblur="commitXPEdit('${a}','${s}','cur',this)"
           onkeydown="if(event.key==='Enter')commitXPEdit('${a}','${s}','cur',this);if(event.key==='Escape'){xpEditField=null;renderQuests();}">`
-      :`<span class="xp-val" title="더블클릭으로 편집" ondblclick="startXPEdit('${a}','${s}','cur')">${xp.cur||0}</span>`;
+      :`<span class="xp-val" id="xpCur_${a}_${s}" title="클릭 편집, 휠 조정" onclick="startXPEdit('${a}','${s}','cur')">${xp.cur||0}</span>`;
     const maxEl=curEditing&&xpEditField.field==='max'
       ?`<input id="xpe_${a}_${s}_max" type="number" value="${xp.max||4000}" min="0"
           onfocus="this.select()"
           onblur="commitXPEdit('${a}','${s}','max',this)"
           onkeydown="if(event.key==='Enter')commitXPEdit('${a}','${s}','max',this);if(event.key==='Escape'){xpEditField=null;renderQuests();}">`
-      :`<span class="xp-val" title="더블클릭으로 편집" ondblclick="startXPEdit('${a}','${s}','max')">${xp.max||4000}</span>`;
-    return `<div class="xp-inline">${curEl}<span class="prog-sep">/</span>${maxEl}</div>`;
+      :`<span class="xp-val" title="클릭 편집" onclick="startXPEdit('${a}','${s}','max')">${xp.max||4000}</span>`;
+    return `<div class="xp-inline" id="xpWrap_${a}_${s}">${curEl}<span class="prog-sep">/</span>${maxEl}</div>`;
   }
 
   // Col 1: daily[0] + weekly[0], Col 2: daily[1] + weekly[1], Col 3: daily[2] + weekly[2]
@@ -905,6 +915,9 @@ function renderQuests(){
         if(el)el.addEventListener('wheel',e=>progWheel(e,a,s,type,idx),{passive:false});
       });
     });
+    // XP cur wheel
+    const xpEl=document.getElementById(`xpCur_${a}_${s}`);
+    if(xpEl)xpEl.addEventListener('wheel',e=>xpWheel(e,a,s),{passive:false});
   },0);
 }
 

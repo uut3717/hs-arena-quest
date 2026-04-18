@@ -174,24 +174,34 @@ button{cursor:pointer;}
 .deck-badge.active{background:rgba(77,184,112,.15);color:var(--win);border:1px solid rgba(77,184,112,.3);}
 .deck-badge.done-win{background:rgba(200,168,75,.15);color:var(--gold);border:1px solid rgba(200,168,75,.3);}
 .deck-badge.done-loss{background:rgba(224,85,80,.12);color:var(--loss);border:1px solid rgba(224,85,80,.3);}
-/* Score */
-.score-wrap{padding:13px 15px;display:flex;align-items:center;justify-content:center;gap:22px;}
-.score-blk{display:flex;flex-direction:column;align-items:center;gap:5px;}
+/* Score - sequence based */
+.score-wrap{padding:10px 15px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.score-cls-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.score-cls-name{font-family:var(--ft);font-size:18px;font-weight:700;color:var(--text1);letter-spacing:.04em;}
+.score-count{display:flex;gap:14px;}
+.score-cnt{font-family:var(--ft);font-size:13px;}
+.score-cnt.wc{color:var(--win);}
+.score-cnt.lc{color:var(--loss);}
+.seq-pips{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;}
+.seq-pip{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;transition:all .12s;}
+.seq-pip.w{background:var(--win);border-color:var(--win);}
+.seq-pip.l{background:var(--loss);border-color:var(--loss);}
+.seq-pip.empty{border-style:dashed;opacity:.4;}
+.seq-pip:hover{opacity:.75;}
+/* score-ctrl stays for +/- */
+.score-blk{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .score-lbl{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;}
-.pips{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;max-width:145px;margin-bottom:3px;}
-.pip{width:10px;height:10px;border-radius:2px;border:1px solid var(--border);background:var(--bg3);}
-.pip.wpip{background:var(--win);border-color:var(--win);}
-.pip.lpip{background:var(--loss);border-color:var(--loss);}
 .score-ctrl{display:flex;align-items:center;gap:9px;}
 .sc-btn{width:30px;height:30px;border:1px solid var(--border);border-radius:50%;background:var(--bg3);font-size:17px;display:flex;align-items:center;justify-content:center;line-height:1;user-select:none;}
 .sc-btn:hover:not(:disabled){background:var(--bg4);border-color:var(--border2);}
 .sc-btn.wb:hover:not(:disabled){border-color:var(--win);color:var(--win);}
 .sc-btn.lb:hover:not(:disabled){border-color:var(--loss);color:var(--loss);}
 .sc-btn:disabled{opacity:.22;cursor:default;}
-.sc-val{font-family:var(--ft);font-size:32px;font-weight:700;min-width:38px;text-align:center;user-select:none;}
+.sc-val{font-family:var(--ft);font-size:28px;font-weight:700;min-width:34px;text-align:center;user-select:none;}
 .sc-val.wv{color:var(--win);}
 .sc-val.lv{color:var(--loss);}
-.score-sep{font-family:var(--ft);font-size:22px;color:var(--text3);margin-top:14px;}
+.score-sep{font-family:var(--ft);font-size:22px;color:var(--text3);}
+.score-btns-row{display:flex;align-items:center;gap:18px;}
 /* Deck note */
 .deck-note-wrap{padding:0 15px 10px;}
 .deck-note{width:100%;min-height:52px;color:var(--text2);font-size:13px;}
@@ -203,22 +213,26 @@ button{cursor:pointer;}
 .opp-title{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}
 .opp-fold-btn{font-size:11px;color:var(--text3);background:none;border:none;padding:2px 6px;}
 .opp-fold-btn:hover{color:var(--text2);}
-/* Match row: coin | cls | result | btag | oppleg | note | date */
-.opp-row{display:grid;grid-template-columns:30px 44px 30px minmax(80px,1.2fr) minmax(80px,1fr) minmax(60px,.8fr) 52px;gap:4px;align-items:center;padding:6px 10px;border-top:1px solid var(--border);font-size:13px;}
+/* Match row: 2-line layout on PC, key info prominent */
+.opp-row{display:grid;grid-template-columns:36px 64px 36px 1fr 1fr 80px;gap:0 6px;align-items:center;padding:6px 10px;border-top:1px solid var(--border);font-size:13px;}
 .opp-row:hover{background:var(--bg3);}
-.opp-coin{text-align:center;cursor:pointer;font-size:13px;font-weight:700;user-select:none;}
+.opp-coin{text-align:center;cursor:pointer;font-size:15px;font-weight:700;user-select:none;}
 .opp-coin.first{color:#4a8fd4;}
 .opp-coin.second{color:#c8963e;}
-.opp-cls-sel{font-size:12px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:3px 5px;width:100%;}
+.opp-cls-sel{font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:4px 5px;width:100%;text-align:center;font-weight:600;}
 .opp-cls-sel:focus{border-color:var(--gold);outline:none;}
-.opp-result-tog{text-align:center;font-size:12px;font-weight:700;padding:3px 4px;border-radius:4px;cursor:pointer;user-select:none;min-width:26px;}
+.opp-result-tog{text-align:center;font-size:14px;font-weight:700;padding:4px 4px;border-radius:4px;cursor:pointer;user-select:none;min-width:32px;}
 .opp-result-tog.W{background:rgba(77,184,112,.2);color:var(--win);}
 .opp-result-tog.L{background:rgba(224,85,80,.15);color:var(--loss);}
 .opp-result-tog.Q{background:var(--bg3);color:var(--text3);border:1px dashed var(--border);}
-.opp-inp{font-size:12px;background:var(--bg3);border:none;border-radius:4px;padding:3px 6px;width:100%;color:var(--text2);}
+/* secondary fields: stacked in one cell */
+.opp-secondary{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.opp-inp{font-size:11px;background:var(--bg3);border:none;border-radius:3px;padding:2px 5px;width:100%;color:var(--text2);}
 .opp-inp::placeholder{color:var(--text3);}
 .opp-inp:focus{outline:1px solid var(--gold);color:var(--text1);}
-.opp-date{font-size:10px;color:var(--text3);text-align:right;white-space:nowrap;}
+.opp-date{font-size:10px;color:var(--text3);text-align:right;white-space:nowrap;line-height:1.3;}
+/* Match sequence pips */
+.match-seq{display:flex;gap:3px;flex-wrap:wrap;padding:4px 15px 0;}
 
 /* Complete overlay */
 .complete-overlay{position:absolute;inset:0;background:rgba(26,23,18,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;border-radius:var(--rlg);backdrop-filter:blur(3px);z-index:10;}
@@ -294,13 +308,13 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
 @media(max-width:760px){
   .quest-grid{grid-template-columns:1fr 1fr;}
   .q-event-col{grid-column:1/-1;}
-  .opp-row{grid-template-columns:28px 40px 28px 1fr 1fr 1fr 44px;font-size:12px;}
+  .opp-row{grid-template-columns:30px 56px 30px 1fr 70px;font-size:12px;}
 }
 @media(max-width:480px){
   .quest-grid{grid-template-columns:1fr;}
   .q-event-col{grid-column:1;}
   .ng-grid{grid-template-columns:auto repeat(3,1fr);}
-  .opp-row{grid-template-columns:26px 38px 26px 1fr 1fr 40px;font-size:11px;gap:3px;}
+  .opp-row{grid-template-columns:28px 52px 28px 1fr 60px;font-size:11px;gap:3px;}
 }
 </style>
 </head>
@@ -940,8 +954,6 @@ function renderDeck(){
   if(!dk){area.innerHTML=`<div class="no-deck"><p>${a}-${s} 서버에 진행 중인 아레나 덱이 없습니다</p><button class="btn gold" onclick="addNewDeck()">+ 새 덱 시작</button></div>`;return;}
   const isComplete=dk.wins>=MAX_W||dk.losses>=MAX_L;
   const clsOpts=CLS_ORDER.map(c=>`<option value="${c}"${c===dk.cls?' selected':''}>${CLS_S[c]||c}</option>`).join('');
-  const wPips=Array.from({length:MAX_W},(_,i)=>`<div class="pip${i<dk.wins?' wpip':''}"></div>`).join('');
-  const lPips=Array.from({length:MAX_L},(_,i)=>`<div class="pip${i<dk.losses?' lpip':''}"></div>`).join('');
   const opps=dk.opponents;
   const showN=foldedOpps?Math.min(3,opps.length):opps.length;
   const oppHtml=opps.slice(0,showN).map((m,i)=>{
@@ -956,13 +968,15 @@ function renderDeck(){
         <option value="">—</option>${CLS_ORDER.map(c=>`<option value="${c}"${c===m.cls?' selected':''}>${CLS_S[c]||c}</option>`).join('')}
       </select>
       <span class="opp-result-tog ${resCls}" onclick="toggleMatchResult('${a}','${s}',${i})" title="클릭 전환">${resLbl}</span>
-      <input class="opp-inp" type="text" placeholder="배틀태그" value="${(m.btag||'').replace(/"/g,'&quot;')}"
-        oninput="updateMatch('${a}','${s}',${i},'btag',this.value)">
-      <input class="opp-inp" type="text" placeholder="상대 전설" value="${(m.oppLeg||'').replace(/"/g,'&quot;')}"
-        oninput="updateMatch('${a}','${s}',${i},'oppLeg',this.value)">
-      <input class="opp-inp" type="text" placeholder="메모" value="${(m.note||'').replace(/"/g,'&quot;')}"
-        oninput="updateMatch('${a}','${s}',${i},'note',this.value)">
-      <span class="opp-date">${dt}</span>
+      <div class="opp-secondary">
+        <input class="opp-inp" type="text" placeholder="배틀태그" value="${(m.btag||'').replace(/"/g,'&quot;')}"
+          oninput="updateMatch('${a}','${s}',${i},'btag',this.value)">
+        <input class="opp-inp" type="text" placeholder="상대 전설" value="${(m.oppLeg||'').replace(/"/g,'&quot;')}"
+          oninput="updateMatch('${a}','${s}',${i},'oppLeg',this.value)">
+        <input class="opp-inp" type="text" placeholder="메모" value="${(m.note||'').replace(/"/g,'&quot;')}"
+          oninput="updateMatch('${a}','${s}',${i},'note',this.value)">
+      </div>
+      <div class="opp-date">${dt}</div>
     </div>`;
   }).join('');
   const foldBtn=opps.length>3?`<button class="opp-fold-btn" onclick="foldedOpps=!foldedOpps;renderDeck()">${foldedOpps?`펼치기(${opps.length})`: '접기'}</button>`:'';
@@ -973,29 +987,44 @@ function renderDeck(){
     <button class="btn gold" onclick="promptReward('${a}','${s}')">보상 및 평점 입력</button>
     <button class="btn sm" onclick="finalizeDeck('${a}','${s}','complete');render()">보상 없이 완료</button>
   </div>`:'';
+  // 매치 결과 기반 시퀀스 pip 생성 (최신이 앞에 있으므로 reverse)
+  const matchSeq=[...opps].reverse().map(m=>m.result); // 'W','L','Q' 시간순
+  // 남은 슬롯: 12승 or 3패까지
+  const seqPips=()=>{
+    let html='';
+    // 최대 15칸 (12W + 3L)을 매치 순서대로
+    const filled=matchSeq.filter(r=>r==='W'||r==='L');
+    filled.forEach(r=>{html+=`<div class="seq-pip ${r==='W'?'w':'l'}"></div>`;});
+    // 남은 빈 칸 (최대 표시: 승 남은 것 + 패 남은 것)
+    const remW=MAX_W-dk.wins;const remL=MAX_L-dk.losses;
+    const remTotal=Math.min(remW+remL,MAX_W+MAX_L-filled.length);
+    for(let i=0;i<Math.min(remTotal,6);i++)html+=`<div class="seq-pip empty"></div>`;
+    return html;
+  };
   area.innerHTML=`<div class="deck-card">
     ${overlay}
     <div class="deck-hdr">
-      <select class="class-sel" onchange="updateDeckField('${a}','${s}','cls',this.value)">${clsOpts}</select>
       <input class="deck-my-legend" type="text" placeholder="내 전설 카드" value="${(dk.myLeg||'').replace(/"/g,'&quot;')}"
         oninput="updateDeckField('${a}','${s}','myLeg',this.value)">
       <span class="deck-badge ${isComplete?(dk.wins>=MAX_W?'done-win':'done-loss'):'active'}">${isComplete?(dk.wins>=MAX_W?'12승':'3패'):'진행중'}</span>
       <span style="font-size:11px;color:var(--text3);margin-left:auto">${new Date(dk.createdAt).toLocaleDateString('ko-KR')}</span>
     </div>
     <div class="score-wrap">
-      <div class="score-blk">
-        <span class="score-lbl">승리</span>
-        <div class="pips">${wPips}</div>
+      <div class="score-cls-row">
+        <select class="class-sel" onchange="updateDeckField('${a}','${s}','cls',this.value)">${clsOpts}</select>
+        <div class="score-count">
+          <span class="score-cnt wc">${dk.wins}승</span>
+          <span class="score-cnt lc">${dk.losses}패</span>
+        </div>
+      </div>
+      <div class="seq-pips">${seqPips()}</div>
+      <div class="score-btns-row">
         <div class="score-ctrl">
           <button class="sc-btn lb" onclick="changeW('${a}','${s}',-1)" ${dk.wins<=0?'disabled':''}>−</button>
           <div class="sc-val wv" id="scW_${a}_${s}">${dk.wins}</div>
           <button class="sc-btn wb" onclick="changeW('${a}','${s}',1)" ${dk.wins>=MAX_W||isComplete?'disabled':''}>+</button>
         </div>
-      </div>
-      <div class="score-sep">/</div>
-      <div class="score-blk">
-        <span class="score-lbl">패배</span>
-        <div class="pips">${lPips}</div>
+        <span class="score-sep">/</span>
         <div class="score-ctrl">
           <button class="sc-btn wb" onclick="changeL('${a}','${s}',-1)" ${dk.losses<=0?'disabled':''}>−</button>
           <div class="sc-val lv" id="scL_${a}_${s}">${dk.losses}</div>
@@ -1012,9 +1041,9 @@ function renderDeck(){
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
         ${foldBtn}
       </div>
-      <div style="font-size:11px;color:var(--text3);padding:0 10px 4px;display:grid;grid-template-columns:30px 44px 30px minmax(80px,1.2fr) minmax(80px,1fr) minmax(60px,.8fr) 52px;gap:4px">
-        <span></span><span style="text-align:center">클래스</span><span style="text-align:center">결과</span>
-        <span>배틀태그</span><span>상대 전설</span><span>메모</span><span style="text-align:right">시간</span>
+      <div style="font-size:11px;color:var(--text3);padding:0 10px 4px;display:grid;grid-template-columns:36px 64px 36px 1fr 80px;gap:0 6px">
+        <span style="text-align:center">선/후</span><span style="text-align:center">클래스</span><span style="text-align:center">결과</span>
+        <span>배틀태그 / 전설 / 메모</span><span style="text-align:right">시간</span>
       </div>
       <div>${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>
     </div>

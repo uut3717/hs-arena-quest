@@ -1007,9 +1007,6 @@ function renderDeck(){
       <textarea class="deck-note" placeholder="덱 메모 (키카드, 전략, 드래프트 코멘트...)"
         oninput="updateDeckField('${a}','${s}','note',this.value)">${dk.note||''}</textarea>
     </div>
-    <div style="padding:0 15px 10px">
-      <button class="btn sm" onclick="addMatch('${a}','${s}')">+ 매치 추가</button>
-    </div>
     <div class="opp-section">
       <div class="opp-hdr">
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
@@ -1022,7 +1019,10 @@ function renderDeck(){
       <div>${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>
     </div>
   </div>
-  <button class="btn sm gold" style="margin-top:6px;width:100%" onclick="addNewDeck()">+ 새 덱 시작</button>`;
+  <div style="display:flex;gap:6px;margin-top:6px">
+    <button class="btn sm gold" style="flex:1" onclick="addMatch('${a}','${s}')">+ 매치 추가</button>
+    <button class="btn sm red" onclick="if(confirm('현재 덱을 삭제할까요? 기록에 남지 않습니다.')){sd(K('${a}','${s}','deck'),null);render()}">덱 삭제</button>
+  </div>`;
   setTimeout(()=>{
     const wv=document.getElementById(`scW_${a}_${s}`);const lv=document.getElementById(`scL_${a}_${s}`);
     if(wv)wv.addEventListener('wheel',e=>{e.preventDefault();changeW(a,s,e.deltaY<0?1:-1);},{passive:false});

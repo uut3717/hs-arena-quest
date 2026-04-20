@@ -118,11 +118,12 @@ button{cursor:pointer;}
    오른쪽: 이벤트 열 (세로 전체)
 */
 .quest-outer{padding:10px 12px;}
-.quest-grid{display:grid;grid-template-columns:1fr 180px;gap:8px 12px;align-items:start;}
+.quest-grid{display:grid;grid-template-columns:1fr 175px;gap:8px 12px;align-items:start;}
 .quest-left{display:flex;flex-direction:column;gap:7px;}
 .quest-row-section{display:flex;flex-direction:column;gap:5px;}
 .quest-row-hdr{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-left:3px solid var(--gold);margin-bottom:3px;background:rgba(200,168,75,.06);}
-.quest-row-items{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+/* 3열이지만 각 카드 최대폭 제한 — 인게임 세로 비율 유지 */
+.quest-row-items{display:grid;grid-template-columns:repeat(3,minmax(0,200px));gap:6px;justify-content:start;}
 /* event column */
 .q-event-col{display:flex;flex-direction:column;gap:6px;}
 .event-col-hdr{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px;}
@@ -142,20 +143,20 @@ button{cursor:pointer;}
 .pb{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
 .pb-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .3s;}
 
-/* Quest item */
-.qi{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;cursor:default;}
+/* Quest item — 인게임 세로 비율(약 1:1.4) */
+.qi{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 11px;cursor:default;min-height:110px;display:flex;flex-direction:column;}
 .qi.done{opacity:.4;}
 .qi.drag-over{border-color:var(--gold);}
-/* Empty slot — clickable */
-.qi-empty{background:var(--bg3);border:1px dashed var(--border);border-radius:8px;padding:8px 10px;min-height:52px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,background .15s;}
+/* Empty slot */
+.qi-empty{background:var(--bg3);border:1px dashed var(--border);border-radius:8px;padding:10px 11px;min-height:110px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,background .15s;}
 .qi-empty:hover{border-color:var(--gold);background:var(--bg4);}
 .qi-empty span{font-size:12px;color:var(--text3);}
 .qi-empty:hover span{color:var(--gold);}
-.qi-top{display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;}
+.qi-top{display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;flex:1;}
 .qi-cb{width:15px;height:15px;border:1.5px solid var(--border2);border-radius:3px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all .18s;}
 .qi-cb.ck{background:var(--gold);border-color:var(--gold);}
 .qi-cb.ck::after{content:'✓';font-size:9px;color:#1a1712;font-weight:700;}
-.qi-text{flex:1;font-size:13px;color:var(--text1);line-height:1.3;word-break:keep-all;}
+.qi-text{flex:1;font-size:13px;color:var(--text1);line-height:1.4;word-break:keep-all;}
 .qi-actions{display:flex;gap:1px;flex-shrink:0;}
 .qi-edit-btn,.qi-del-btn{background:none;border:none;font-size:12px;padding:1px 3px;color:var(--text3);line-height:1;}
 .qi-edit-btn:hover{color:var(--gold);}
@@ -216,26 +217,28 @@ button{cursor:pointer;}
 .opp-title{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}
 .opp-fold-btn{font-size:11px;color:var(--text3);background:none;border:none;padding:2px 6px;}
 .opp-fold-btn:hover{color:var(--text2);}
+/* Match section wrapper — 가운데 집중 */
+.opp-inner{max-width:680px;margin:0 auto;}
 /* Match row: 2줄 — 1줄:선후·직업·전설·승패 / 2줄:배틀태그·메모·날짜 */
-.opp-row{display:flex;flex-direction:column;gap:2px;padding:5px 10px;border-top:1px solid var(--border);}
+.opp-row{display:flex;flex-direction:column;gap:3px;padding:6px 12px;border-top:1px solid var(--border);}
 .opp-row:hover{background:var(--bg3);}
-.opp-row-top{display:grid;grid-template-columns:20px 34px 1fr 28px;gap:4px;align-items:center;}
-.opp-row-bot{display:grid;grid-template-columns:1fr 1fr 58px;gap:4px;align-items:center;}
-.opp-coin{text-align:center;cursor:pointer;font-size:12px;font-weight:700;user-select:none;}
+.opp-row-top{display:grid;grid-template-columns:24px 52px 1fr 36px;gap:6px;align-items:center;}
+.opp-row-bot{display:grid;grid-template-columns:1fr 1fr 64px;gap:6px;align-items:center;}
+.opp-coin{text-align:center;cursor:pointer;font-size:13px;font-weight:700;user-select:none;}
 .opp-coin.first{color:#4a8fd4;}
 .opp-coin.second{color:#c8963e;}
-.opp-cls-sel{font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:2px 0;width:100%;text-align:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;}
+.opp-cls-sel{font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:3px 2px;width:100%;text-align:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;font-family:var(--ff);}
 .opp-cls-sel:focus{border-color:var(--gold);outline:none;}
-.opp-leg-inp{font-size:12px;background:var(--bg3);border:none;border-radius:3px;padding:2px 5px;width:100%;color:var(--text1);}
-.opp-leg-inp::placeholder{color:var(--text3);font-size:11px;}
+.opp-leg-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:3px 7px;width:100%;color:var(--text1);font-family:var(--ff);}
+.opp-leg-inp::placeholder{color:var(--text3);}
 .opp-leg-inp:focus{outline:1px solid var(--gold);}
-.opp-result-tog{text-align:center;font-size:11px;font-weight:700;padding:2px 3px;border-radius:3px;cursor:pointer;user-select:none;}
+.opp-result-tog{text-align:center;font-size:13px;font-weight:700;padding:3px 4px;border-radius:4px;cursor:pointer;user-select:none;}
 .opp-result-tog.W{background:rgba(77,184,112,.2);color:var(--win);}
 .opp-result-tog.L{background:rgba(224,85,80,.15);color:var(--loss);}
 .opp-result-tog.Q{background:var(--bg3);color:var(--text3);border:1px dashed var(--border);}
 .opp-date-sm{font-size:10px;color:var(--text3);white-space:nowrap;text-align:right;}
-.opp-inp{font-size:12px;background:var(--bg3);border:none;border-radius:3px;padding:2px 5px;width:100%;color:var(--text2);}
-.opp-inp::placeholder{color:var(--text3);font-size:11px;}
+.opp-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:3px 7px;width:100%;color:var(--text2);font-family:var(--ff);}
+.opp-inp::placeholder{color:var(--text3);}
 .opp-inp:focus{outline:1px solid var(--gold);color:var(--text1);}
 
 /* Complete overlay */
@@ -333,7 +336,6 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
 <body>
 <div class="login-overlay" id="loginOverlay">
   <div class="login-logo">ARENA QUEST</div>
-  <div class="login-sub">헤스스톤 아레나 트래커</div>
   <button class="login-btn" id="loginBtn" onclick="handleAuth()">
     <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
     Google로 로그인
@@ -832,18 +834,18 @@ function renderNavGrid(){
         <button class="stab acc-${a}${isActive?' active':''}" onclick="curAcc='${a}';curSrv='${s}';foldedOpps=false;render()">
           <span class="dot${getDeck(a,s)?' has-deck':''}"></span>${s}
         </button>
-        <div style="border:1px solid ${isActive?'var(--acc)':'var(--border)'};border-top:none;border-radius:0 0 var(--r) var(--r);background:var(--bg2);padding:4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:80px;">
-          <div style="display:flex;align-items:center;gap:4px;">
-            <span style="font-size:10px;color:var(--text3);">평점</span>
+        <div style="border:1px solid ${isActive?'var(--acc)':'var(--border)'};border-top:none;border-radius:0 0 var(--r) var(--r);background:var(--bg2);padding:6px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:80px;">
+          <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:center;">
+            <span style="font-size:11px;color:var(--text3);">평점</span>
             <input id="${rid}" type="number" value="${ratingVal}" placeholder="—"
               onfocus="this.select()"
               onchange="saveRatingField('${a}','${s}',this.value);renderNavGrid()"
               onkeydown="navRatingKey(event,'${a}','${s}',this)"
-              style="background:none;border:none;padding:1px 0;width:58px;font-size:14px;font-family:var(--ft);color:var(--gold);text-align:center;outline:none;-moz-appearance:textfield;">
+              style="background:none;border:none;padding:2px 0;width:60px;font-size:15px;font-family:var(--ft);color:var(--gold);text-align:center;outline:none;-moz-appearance:textfield;">
           </div>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <span style="font-size:10px;color:var(--text3);">XP</span>
-            <span id="${xid}" style="font-size:13px;font-family:var(--ft);color:${isActive?'var(--gold)':'var(--text3)'};cursor:${isActive?'pointer':'default'}" title="${isActive?'휠=50, 위아래키=1':''}">${xp.cur||0}</span>
+          <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:center;padding:2px 0;">
+            <span style="font-size:11px;color:var(--text3);">XP</span>
+            <span id="${xid}" style="font-size:13px;font-family:var(--ft);color:${isActive?'var(--gold)':'var(--text3)'};cursor:${isActive?'pointer':'default'};padding:2px 4px;" title="${isActive?'휠=50, 위아래키=1':''}">${xp.cur||0}</span>
           </div>
           ${isActive?`<div class="reset-inline">리셋 <span id="resetTimer">${resetStr(s)}</span></div>`:''}
         </div>
@@ -1133,10 +1135,10 @@ function renderDeck(){
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
         ${foldBtn}
       </div>
-      <div style="font-size:10px;color:var(--text3);padding:2px 10px 1px;display:grid;grid-template-columns:20px 34px 1fr 28px;gap:4px">
+      <div style="font-size:10px;color:var(--text3);padding:3px 12px 2px;max-width:680px;margin:0 auto;display:grid;grid-template-columns:24px 52px 1fr 36px;gap:6px">
         <span style="text-align:center">선/후</span><span style="text-align:center">직업</span><span>상대 전설</span><span style="text-align:center">결과</span>
       </div>
-      <div>${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>
+      <div class="opp-inner">${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>
     </div>
   </div>
   <div style="display:flex;gap:6px;margin-top:6px">

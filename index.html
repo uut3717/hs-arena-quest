@@ -117,14 +117,14 @@ button{cursor:pointer;}
    왼쪽: [일일 헤더 3열] + [주간 헤더 3열] 쌓기
    오른쪽: 이벤트 열 (세로 전체)
 */
-.quest-outer{padding:12px 14px;}
-.quest-grid{display:grid;grid-template-columns:1fr 190px;gap:10px 14px;align-items:start;}
-.quest-left{display:flex;flex-direction:column;gap:8px;}
-.quest-row-section{display:flex;flex-direction:column;gap:6px;}
-.quest-row-hdr{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.08em;text-transform:uppercase;padding-bottom:5px;border-bottom:1px solid var(--border);margin-bottom:2px;}
-.quest-row-items{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.quest-outer{padding:10px 12px;}
+.quest-grid{display:grid;grid-template-columns:1fr 180px;gap:8px 12px;align-items:start;}
+.quest-left{display:flex;flex-direction:column;gap:7px;}
+.quest-row-section{display:flex;flex-direction:column;gap:5px;}
+.quest-row-hdr{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-left:3px solid var(--gold);margin-bottom:3px;background:rgba(200,168,75,.06);}
+.quest-row-items{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
 /* event column */
-.q-event-col{display:flex;flex-direction:column;gap:8px;}
+.q-event-col{display:flex;flex-direction:column;gap:6px;}
 .event-col-hdr{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px;}
 .event-fold-btn{background:none;border:none;color:var(--text3);font-size:13px;padding:0 3px;}
 .event-fold-btn:hover{color:var(--gold);}
@@ -219,23 +219,23 @@ button{cursor:pointer;}
 /* Match row: 2줄 — 1줄:선후·직업·전설·승패 / 2줄:배틀태그·메모·날짜 */
 .opp-row{display:flex;flex-direction:column;gap:2px;padding:5px 10px;border-top:1px solid var(--border);}
 .opp-row:hover{background:var(--bg3);}
-.opp-row-top{display:grid;grid-template-columns:22px 36px 1fr 30px;gap:4px;align-items:center;}
-.opp-row-bot{display:grid;grid-template-columns:1fr 1fr 56px;gap:4px;align-items:center;padding-left:2px;}
+.opp-row-top{display:grid;grid-template-columns:20px 34px 1fr 28px;gap:4px;align-items:center;}
+.opp-row-bot{display:grid;grid-template-columns:1fr 1fr 58px;gap:4px;align-items:center;}
 .opp-coin{text-align:center;cursor:pointer;font-size:12px;font-weight:700;user-select:none;}
 .opp-coin.first{color:#4a8fd4;}
 .opp-coin.second{color:#c8963e;}
-.opp-cls-sel{font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:2px 2px;width:100%;text-align:center;}
+.opp-cls-sel{font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:2px 0;width:100%;text-align:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;}
 .opp-cls-sel:focus{border-color:var(--gold);outline:none;}
 .opp-leg-inp{font-size:12px;background:var(--bg3);border:none;border-radius:3px;padding:2px 5px;width:100%;color:var(--text1);}
-.opp-leg-inp::placeholder{color:var(--text3);}
+.opp-leg-inp::placeholder{color:var(--text3);font-size:11px;}
 .opp-leg-inp:focus{outline:1px solid var(--gold);}
-.opp-result-tog{text-align:center;font-size:12px;font-weight:700;padding:2px 4px;border-radius:3px;cursor:pointer;user-select:none;}
+.opp-result-tog{text-align:center;font-size:11px;font-weight:700;padding:2px 3px;border-radius:3px;cursor:pointer;user-select:none;}
 .opp-result-tog.W{background:rgba(77,184,112,.2);color:var(--win);}
 .opp-result-tog.L{background:rgba(224,85,80,.15);color:var(--loss);}
 .opp-result-tog.Q{background:var(--bg3);color:var(--text3);border:1px dashed var(--border);}
 .opp-date-sm{font-size:10px;color:var(--text3);white-space:nowrap;text-align:right;}
 .opp-inp{font-size:12px;background:var(--bg3);border:none;border-radius:3px;padding:2px 5px;width:100%;color:var(--text2);}
-.opp-inp::placeholder{color:var(--text3);}
+.opp-inp::placeholder{color:var(--text3);font-size:11px;}
 .opp-inp:focus{outline:1px solid var(--gold);color:var(--text1);}
 
 /* Complete overlay */
@@ -962,22 +962,15 @@ function renderQuests(){
   const xpPct=xp.max>0?Math.min(100,Math.round((xp.cur||0)/xp.max*100)):0;
   const evIcon=evCol?'▶':'▼';
 
-  // XP inline display: cur / max, click to edit, wheel on cur to adjust
   function makeXPInline(){
-    const curEditing=xpEditField&&xpEditField.a===a&&xpEditField.s===s;
-    const curEl=curEditing&&xpEditField.field==='cur'
+    const curEditing=xpEditField&&xpEditField.a===a&&xpEditField.s===s&&xpEditField.field==='cur';
+    const curEl=curEditing
       ?`<input id="xpe_${a}_${s}_cur" type="number" value="${xp.cur||0}" min="0"
           onfocus="this.select()"
           onblur="commitXPEdit('${a}','${s}','cur',this)"
           onkeydown="xpEditKey(event,'${a}','${s}','cur',this)">`
-      :`<span class="xp-val" id="xpCur_${a}_${s}" title="클릭 편집, 휠=50, 키보드↑↓=1" onclick="startXPEdit('${a}','${s}','cur')">${xp.cur||0}</span>`;
-    const maxEl=curEditing&&xpEditField.field==='max'
-      ?`<input id="xpe_${a}_${s}_max" type="number" value="${xp.max||4000}" min="0"
-          onfocus="this.select()"
-          onblur="commitXPEdit('${a}','${s}','max',this)"
-          onkeydown="xpEditKey(event,'${a}','${s}','max',this)">`
-      :`<span class="xp-val" title="클릭 편집" onclick="startXPEdit('${a}','${s}','max')">${xp.max||4000}</span>`;
-    return `<div class="xp-inline" id="xpWrap_${a}_${s}">${curEl}<span class="prog-sep">/</span>${maxEl}</div>`;
+      :`<span class="xp-val" id="xpCur_${a}_${s}" title="클릭 편집, 휠=50, ↑↓=1" onclick="startXPEdit('${a}','${s}','cur')">${xp.cur||0}</span>`;
+    return `<div class="xp-inline" id="xpWrap_${a}_${s}">${curEl}</div>`;
   }
 
   function makeDWCol(colIdx){
@@ -1140,7 +1133,7 @@ function renderDeck(){
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
         ${foldBtn}
       </div>
-      <div style="font-size:10px;color:var(--text3);padding:2px 10px 1px;display:grid;grid-template-columns:22px 36px 1fr 30px;gap:4px">
+      <div style="font-size:10px;color:var(--text3);padding:2px 10px 1px;display:grid;grid-template-columns:20px 34px 1fr 28px;gap:4px">
         <span style="text-align:center">선/후</span><span style="text-align:center">직업</span><span>상대 전설</span><span style="text-align:center">결과</span>
       </div>
       <div>${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>

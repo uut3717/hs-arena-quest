@@ -20,14 +20,18 @@
 .acc-T{--acc:var(--t-acc);--acc-bg:rgba(74,143,212,.13);}
 .acc-H{--acc:var(--h-acc);--acc-bg:rgba(200,150,62,.13);}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--ff);background:var(--bg);color:var(--text1);font-size:15px;min-height:100vh;}
+body{font-family:var(--ff);background:var(--bg);color:var(--text1);font-size:16px;min-height:100vh;}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(200,168,75,.05) 0%,transparent 60%),
   radial-gradient(ellipse 60% 40% at 90% 100%,rgba(74,143,212,.04) 0%,transparent 60%);}
 input,select,button,textarea{font-family:var(--ff);color:var(--text1);}
-input,select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:6px 9px;font-size:14px;outline:none;}
+input,select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:6px 9px;font-size:15px;outline:none;}
 input:focus,select:focus{border-color:var(--gold);}
-textarea{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;font-size:14px;outline:none;resize:vertical;}
+textarea{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;font-size:15px;outline:none;resize:vertical;}
+/* hide number input spinners */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;}
 textarea:focus{border-color:var(--gold);}
 button{cursor:pointer;}
 ::-webkit-scrollbar{width:4px;height:4px;}
@@ -50,16 +54,16 @@ button{cursor:pointer;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* ── BUTTONS ── */
-.btn{padding:5px 13px;border:1px solid var(--border);border-radius:var(--r);background:none;font-size:13px;color:var(--text1);transition:all .15s;}
+.btn{padding:5px 13px;border:1px solid var(--border);border-radius:var(--r);background:none;font-size:14px;color:var(--text1);transition:all .15s;}
 .btn:hover{background:var(--bg3);border-color:var(--border2);}
 .btn.gold{border-color:var(--gold);color:var(--gold);}
 .btn.gold:hover{background:rgba(200,168,75,.12);}
 .btn.red{border-color:var(--loss);color:var(--loss);}
 .btn.red:hover{background:rgba(224,85,80,.1);}
 .btn.nav-active{background:var(--bg3);border-color:var(--gold);color:var(--gold);}
-.btn.sm{padding:3px 9px;font-size:12px;}
-.btn.xs{padding:2px 6px;font-size:11px;}
-.tog{padding:4px 10px;border:1px solid var(--border);border-radius:var(--r);background:none;font-size:12px;color:var(--text2);transition:all .15s;}
+.btn.sm{padding:3px 10px;font-size:13px;}
+.btn.xs{padding:2px 7px;font-size:12px;}
+.tog{padding:4px 11px;border:1px solid var(--border);border-radius:var(--r);background:none;font-size:13px;color:var(--text2);transition:all .15s;}
 .tog:hover{border-color:var(--border2);color:var(--text1);}
 .tog.on{border-color:var(--gold);color:var(--gold);background:rgba(200,168,75,.1);}
 .tog.on.t{border-color:var(--t-acc);color:var(--t-acc);background:rgba(74,143,212,.1);}
@@ -86,7 +90,7 @@ button{cursor:pointer;}
 .ng-sep-col{background:var(--border);width:1px;margin:0 8px;align-self:stretch;}
 /* tab cell */
 .ng-tab-cell{display:flex;flex-direction:column;align-items:stretch;padding:0 3px;}
-.stab{padding:6px 10px;border:1px solid var(--border);border-radius:var(--r) var(--r) 0 0;background:none;font-size:13px;font-family:var(--ft);color:var(--text2);letter-spacing:.04em;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:5px;width:100%;}
+.stab{padding:7px 14px;border:1px solid var(--border);border-radius:var(--r) var(--r) 0 0;background:none;font-size:14px;font-family:var(--ft);color:var(--text2);letter-spacing:.04em;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:5px;width:100%;}
 .stab:hover{color:var(--text1);border-color:var(--border2);}
 .stab.active{border-color:var(--acc);color:var(--acc);background:var(--acc-bg);border-bottom-color:transparent;}
 .stab .dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;}
@@ -113,19 +117,19 @@ button{cursor:pointer;}
 .quest-outer{padding:14px;}
 .quest-grid{display:grid;grid-template-columns:repeat(3,1fr) 220px;gap:12px 14px;align-items:start;}
 /* col labels */
-.q-col-hdr{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border);text-align:center;margin-bottom:4px;}
+.q-col-hdr{font-size:13px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border);text-align:center;margin-bottom:4px;}
 /* event column: does NOT span rows — just a normal cell in row 1 */
 .q-event-col{display:flex;flex-direction:column;gap:8px;}
 /* daily+weekly wrappers stack vertically within their column cell */
 .q-dw-col{display:flex;flex-direction:column;gap:12px;}
 .q-dw-section{display:flex;flex-direction:column;gap:8px;}
-.event-col-hdr{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px;}
-.event-fold-btn{background:none;border:none;color:var(--text3);font-size:12px;padding:0 3px;}
+.event-col-hdr{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px;}
+.event-fold-btn{background:none;border:none;color:var(--text3);font-size:13px;padding:0 3px;}
 .event-fold-btn:hover{color:var(--gold);}
 .event-body{display:flex;flex-direction:column;gap:6px;}
 .event-body.collapsed{display:none;}
 /* XP inline in event header */
-.xp-inline{display:flex;align-items:center;gap:5px;font-family:var(--ft);font-size:13px;color:var(--gold);}
+.xp-inline{display:flex;align-items:center;gap:5px;font-family:var(--ft);font-size:14px;color:var(--gold);}
 .xp-inline .xp-val{cursor:pointer;}
 .xp-inline .xp-val:hover{color:var(--gold2);}
 .xp-inline .xp-edit{display:flex;align-items:center;gap:4px;}
@@ -149,7 +153,7 @@ button{cursor:pointer;}
 .qi-cb{width:17px;height:17px;border:1.5px solid var(--border2);border-radius:4px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .18s;}
 .qi-cb.ck{background:var(--gold);border-color:var(--gold);}
 .qi-cb.ck::after{content:'✓';font-size:10px;color:#1a1712;font-weight:700;}
-.qi-text{flex:1;font-size:14px;color:var(--text1);line-height:1.35;word-break:keep-all;}
+.qi-text{flex:1;font-size:15px;color:var(--text1);line-height:1.35;word-break:keep-all;}
 .qi-actions{display:flex;gap:2px;flex-shrink:0;}
 .qi-edit-btn,.qi-del-btn{background:none;border:none;font-size:13px;padding:2px 4px;color:var(--text3);line-height:1;}
 .qi-edit-btn:hover{color:var(--gold);}
@@ -157,11 +161,11 @@ button{cursor:pointer;}
 /* Progress */
 .qi-prog-row{display:flex;align-items:center;gap:6px;}
 .qi-prog-row .pb{flex:1;}
-.prog-text{font-family:var(--ft);font-size:14px;color:var(--gold);cursor:pointer;min-width:32px;text-align:right;flex-shrink:0;}
+.prog-text{font-family:var(--ft);font-size:15px;color:var(--gold);cursor:pointer;min-width:32px;text-align:right;flex-shrink:0;}
 .prog-text:hover{color:var(--gold2);}
-.prog-sep{font-size:12px;color:var(--text3);}
-.prog-tgt{font-size:13px;color:var(--text2);flex-shrink:0;}
-.prog-input{width:52px;font-family:var(--ft);font-size:14px;text-align:right;color:var(--gold);background:var(--bg2);border:1px solid var(--gold);border-radius:4px;padding:2px 4px;}
+.prog-sep{font-size:13px;color:var(--text3);}
+.prog-tgt{font-size:14px;color:var(--text2);flex-shrink:0;}
+.prog-input{width:52px;font-family:var(--ft);font-size:15px;text-align:right;color:var(--gold);background:var(--bg2);border:1px solid var(--gold);border-radius:4px;padding:2px 4px;}
 
 /* ── DECK SECTION ── */
 .deck-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;position:relative;margin-bottom:8px;}
@@ -210,20 +214,22 @@ button{cursor:pointer;}
 .opp-title{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}
 .opp-fold-btn{font-size:11px;color:var(--text3);background:none;border:none;padding:2px 6px;}
 .opp-fold-btn:hover{color:var(--text2);}
-/* Match row: 초컴팩트 1줄 */
-.opp-row{display:grid;grid-template-columns:20px 48px 24px 1fr 1fr 1fr;gap:3px;align-items:center;padding:3px 8px;border-top:1px solid var(--border);font-size:12px;}
+/* Match row: 2줄 레이아웃 */
+.opp-row{display:flex;flex-direction:column;gap:0;padding:7px 10px;border-top:1px solid var(--border);}
 .opp-row:hover{background:var(--bg3);}
-.opp-coin{text-align:center;cursor:pointer;font-size:12px;font-weight:700;user-select:none;}
+.opp-row-main{display:flex;align-items:center;gap:8px;}
+.opp-row-sub{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:5px;margin-top:5px;padding-left:4px;}
+.opp-coin{text-align:center;cursor:pointer;font-size:15px;font-weight:700;user-select:none;flex-shrink:0;width:28px;}
 .opp-coin.first{color:#4a8fd4;}
 .opp-coin.second{color:#c8963e;}
-.opp-cls-sel{font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 2px;width:100%;}
+.opp-cls-sel{font-size:14px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:4px 6px;font-weight:600;flex:1;}
 .opp-cls-sel:focus{border-color:var(--gold);outline:none;}
-.opp-result-tog{text-align:center;font-size:11px;font-weight:700;padding:2px 3px;border-radius:3px;cursor:pointer;user-select:none;}
+.opp-result-tog{text-align:center;font-size:15px;font-weight:700;padding:4px 8px;border-radius:4px;cursor:pointer;user-select:none;flex-shrink:0;}
 .opp-result-tog.W{background:rgba(77,184,112,.2);color:var(--win);}
 .opp-result-tog.L{background:rgba(224,85,80,.15);color:var(--loss);}
 .opp-result-tog.Q{background:var(--bg3);color:var(--text3);border:1px dashed var(--border);}
-.opp-date-sm{font-size:10px;color:var(--text3);white-space:nowrap;text-align:right;}
-.opp-inp{font-size:11px;background:var(--bg3);border:none;border-radius:3px;padding:2px 5px;width:100%;color:var(--text2);}
+.opp-date-sm{font-size:10px;color:var(--text3);white-space:nowrap;margin-left:auto;flex-shrink:0;}
+.opp-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:4px 7px;width:100%;color:var(--text2);}
 .opp-inp::placeholder{color:var(--text3);}
 .opp-inp:focus{outline:1px solid var(--gold);color:var(--text1);}
 
@@ -715,13 +721,6 @@ function saveReward(){
   }
   closePopup('rewardPopup');finalizeDeck(a,s,'complete',reward);rwCtx=null;render();
 }
-function undoComplete(a,s){
-  const dk=getDeck(a,s);if(!dk)return;
-  // 마지막 패를 1 감소시켜 완료 상태 해제
-  if(dk.losses>=MAX_L)dk.losses=Math.max(0,dk.losses-1);
-  else if(dk.wins>=MAX_W)dk.wins=Math.max(0,dk.wins-1);
-  saveDeck(a,s,dk);render();
-}
 function changeW(a,s,d){const dk=getDeck(a,s);if(!dk)return;dk.wins=Math.max(0,Math.min(MAX_W,dk.wins+d));if(d>0&&dk.wins>=MAX_W){saveDeck(a,s,dk);setTimeout(()=>promptReward(a,s),400);render();return;}saveDeck(a,s,dk);render();}
 function changeL(a,s,d){const dk=getDeck(a,s);if(!dk)return;dk.losses=Math.max(0,Math.min(MAX_L,dk.losses+d));if(d>0&&dk.losses>=MAX_L){saveDeck(a,s,dk);setTimeout(()=>promptReward(a,s),400);render();return;}saveDeck(a,s,dk);render();}
 function updateDeckField(a,s,field,val){const dk=getDeck(a,s);if(!dk)return;dk[field]=val;saveDeck(a,s,dk);}
@@ -771,8 +770,14 @@ function qiDE(){dragQiCtx=null;qiDL();}
 /* XP */
 function setXPField(a,s,field,val){const x=getXP(a,s);x[field]=Math.max(0,parseInt(val)||0);saveXP(a,s,x);renderQuests();}
 function startXPEdit(a,s,field){xpEditField={a,s,field};renderQuests();setTimeout(()=>{const el=document.getElementById(`xpe_${a}_${s}_${field}`);if(el){el.focus();el.select();}},0);}
-function commitXPEdit(a,s,field,el){const x=getXP(a,s);const v=parseInt(el.value);if(!isNaN(v))x[field]=Math.max(0,v);saveXP(a,s,x);xpEditField=null;renderQuests();}
-function xpWheel(e,a,s){e.preventDefault();const x=getXP(a,s);const step=e.deltaY<0?1:-1;x.cur=Math.max(0,Math.min(x.max||99999,(x.cur||0)+step));saveXP(a,s,x);renderQuests();}
+function commitXPEdit(a,s,field,el){const x=getXP(a,s);const v=parseInt(el.value);if(!isNaN(v))x[field]=Math.max(0,v);saveXP(a,s,x);xpEditField=null;renderQuests();renderNavGrid();}
+function xpEditKey(e,a,s,field,el){
+  if(e.key==='ArrowUp'){e.preventDefault();const v=(parseInt(el.value)||0)+1;el.value=v;}
+  else if(e.key==='ArrowDown'){e.preventDefault();const v=Math.max(0,(parseInt(el.value)||0)-1);el.value=v;}
+  else if(e.key==='Enter')commitXPEdit(a,s,field,el);
+  else if(e.key==='Escape'){xpEditField=null;renderQuests();}
+}
+function xpWheel(e,a,s){e.preventDefault();const x=getXP(a,s);const step=e.deltaY<0?50:-50;x.cur=Math.max(0,Math.min(x.max||99999,(x.cur||0)+step));saveXP(a,s,x);renderQuests();renderNavGrid();}
 
 
 /* ════════ RATING ════════ */
@@ -807,24 +812,33 @@ function renderNavGrid(){
   let h=`<div style="display:flex;align-items:flex-start;gap:0;flex-wrap:wrap">`;
   ACCOUNTS.forEach((a,ai)=>{
     const accColor=a==='T'?'var(--t-acc)':'var(--h-acc)';
-    if(ai>0)h+=`<div style="width:1px;background:var(--border);margin:0 10px;align-self:stretch;"></div>`;
+    if(ai>0)h+=`<div style="width:1px;background:var(--border);margin:0 16px;align-self:stretch;"></div>`;
     h+=`<div style="display:flex;align-items:flex-start;gap:0">`;
-    h+=`<div style="display:flex;align-items:center;padding:6px 8px 0 0;font-family:var(--ft);font-size:14px;font-weight:600;color:${accColor};letter-spacing:.08em">${a}</div>`;
+    h+=`<div style="display:flex;align-items:center;padding:8px 12px 0 0;font-family:var(--ft);font-size:15px;font-weight:600;color:${accColor};letter-spacing:.08em">${a}</div>`;
     SERVERS.forEach(s=>{
       const isActive=a===curAcc&&s===curSrv;
       const m=getMeta(a,s);
-      h+=`<div style="display:flex;flex-direction:column;align-items:stretch;margin:0 3px;">
+      const xp=getXP(a,s);
+      const ratingVal=m.rating||'';
+      // rating input id for wheel/keyboard attachment
+      const rid=`rating_${a}_${s}`;
+      const xid=`xpval_${a}_${s}`;
+      h+=`<div style="display:flex;flex-direction:column;align-items:stretch;margin:0 5px;">
         <button class="stab acc-${a}${isActive?' active':''}" onclick="curAcc='${a}';curSrv='${s}';foldedOpps=false;render()">
           <span class="dot${getDeck(a,s)?' has-deck':''}"></span>${s}
         </button>
-        <div style="border:1px solid ${isActive?'var(--acc)':'var(--border)'};border-top:none;border-radius:0 0 var(--r) var(--r);background:var(--bg2);padding:3px 6px;display:flex;flex-direction:column;align-items:center;gap:1px;">
-          <div style="display:flex;align-items:center;gap:3px;width:100%;">
-            <span style="width:7px;height:7px;border-radius:50%;background:${accColor};flex-shrink:0;display:inline-block;"></span>
-            <input type="number" value="${m.rating||''}" placeholder="—"
+        <div style="border:1px solid ${isActive?'var(--acc)':'var(--border)'};border-top:none;border-radius:0 0 var(--r) var(--r);background:var(--bg2);padding:4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:80px;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:10px;color:var(--text3);">평점</span>
+            <input id="${rid}" type="number" value="${ratingVal}" placeholder="—"
               onfocus="this.select()"
               onchange="saveRatingField('${a}','${s}',this.value);renderNavGrid()"
-              onkeydown="if(event.key==='Enter')this.blur()"
-              style="background:none;border:none;padding:2px 0;width:52px;font-size:13px;font-family:var(--ft);color:var(--gold);text-align:center;outline:none">
+              onkeydown="navRatingKey(event,'${a}','${s}',this)"
+              style="background:none;border:none;padding:1px 0;width:58px;font-size:14px;font-family:var(--ft);color:var(--gold);text-align:center;outline:none;-moz-appearance:textfield;">
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:10px;color:var(--text3);">XP</span>
+            <span id="${xid}" style="font-size:13px;font-family:var(--ft);color:${isActive?'var(--gold)':'var(--text3)'};cursor:${isActive?'pointer':'default'}" title="${isActive?'휠=50, 위아래키=1':''}">${xp.cur||0}/${xp.max||4000}</span>
           </div>
           ${isActive?`<div class="reset-inline">리셋 <span id="resetTimer">${resetStr(s)}</span></div>`:''}
         </div>
@@ -834,6 +848,38 @@ function renderNavGrid(){
   });
   h+=`</div>`;
   document.getElementById('navGrid').innerHTML=h;
+  // Attach wheel + keyboard to all rating inputs
+  ACCOUNTS.forEach(a=>SERVERS.forEach(s=>{
+    const el=document.getElementById(`rating_${a}_${s}`);
+    if(el){
+      el.addEventListener('wheel',e=>{
+        e.preventDefault();
+        const v=parseFloat(el.value)||0;
+        const nv=Math.max(0,v+(e.deltaY<0?50:-50));
+        el.value=nv;
+        saveRatingField(a,s,nv);
+        document.getElementById(`rating_${a}_${s}`).value=nv;
+      },{passive:false});
+    }
+    // XP wheel on active server display
+    const xel=document.getElementById(`xpval_${a}_${s}`);
+    if(xel&&a===curAcc&&s===curSrv){
+      xel.addEventListener('wheel',e=>{
+        e.preventDefault();
+        const x=getXP(a,s);
+        x.cur=Math.max(0,Math.min(x.max||99999,(x.cur||0)+(e.deltaY<0?50:-50)));
+        saveXP(a,s,x);
+        renderNavGrid();renderQuests();
+      },{passive:false});
+      xel.addEventListener('click',()=>{startXPEdit(a,s,'cur');});
+    }
+  }));
+}
+
+function navRatingKey(e,a,s,el){
+  if(e.key==='ArrowUp'){e.preventDefault();const v=(parseFloat(el.value)||0)+1;el.value=v;saveRatingField(a,s,v);}
+  else if(e.key==='ArrowDown'){e.preventDefault();const v=Math.max(0,(parseFloat(el.value)||0)-1);el.value=v;saveRatingField(a,s,v);}
+  else if(e.key==='Enter')el.blur();
 }
 
 /* ════════ RESET TIMERS ════════ */
@@ -918,23 +964,23 @@ function renderQuests(){
       ?`<input id="xpe_${a}_${s}_cur" type="number" value="${xp.cur||0}" min="0"
           onfocus="this.select()"
           onblur="commitXPEdit('${a}','${s}','cur',this)"
-          onkeydown="if(event.key==='Enter')commitXPEdit('${a}','${s}','cur',this);if(event.key==='Escape'){xpEditField=null;renderQuests();}">`
-      :`<span class="xp-val" id="xpCur_${a}_${s}" title="클릭 편집, 휠 조정" onclick="startXPEdit('${a}','${s}','cur')">${xp.cur||0}</span>`;
+          onkeydown="xpEditKey(event,'${a}','${s}','cur',this)">`
+      :`<span class="xp-val" id="xpCur_${a}_${s}" title="클릭 편집, 휠=50, 키보드↑↓=1" onclick="startXPEdit('${a}','${s}','cur')">${xp.cur||0}</span>`;
     const maxEl=curEditing&&xpEditField.field==='max'
       ?`<input id="xpe_${a}_${s}_max" type="number" value="${xp.max||4000}" min="0"
           onfocus="this.select()"
           onblur="commitXPEdit('${a}','${s}','max',this)"
-          onkeydown="if(event.key==='Enter')commitXPEdit('${a}','${s}','max',this);if(event.key==='Escape'){xpEditField=null;renderQuests();}">`
+          onkeydown="xpEditKey(event,'${a}','${s}','max',this)">`
       :`<span class="xp-val" title="클릭 편집" onclick="startXPEdit('${a}','${s}','max')">${xp.max||4000}</span>`;
     return `<div class="xp-inline" id="xpWrap_${a}_${s}">${curEl}<span class="prog-sep">/</span>${maxEl}</div>`;
   }
 
-  // Col 1: daily[0] + weekly[0], Col 2: daily[1] + weekly[1], Col 3: daily[2] + weekly[2]
-  // Col 4: event (does not span rows)
   function makeDWCol(colIdx){
     const daily=q.daily[colIdx];const weekly=q.weekly[colIdx];
-    const dHdr=colIdx===0?`<div class="q-col-hdr">일일</div>`:`<div class="q-col-hdr" style="opacity:0">일일</div>`;
-    const wHdr=colIdx===0?`<div class="q-col-hdr">주간</div>`:`<div class="q-col-hdr" style="opacity:0">주간</div>`;
+    const dHdr=colIdx===0?`<div class="q-col-hdr">일일</div>`:'';
+    const wHdr=colIdx===0?`<div class="q-col-hdr">주간</div>`:'';
+    // 헤더 없는 열은 첫 번째 열과 세로 정렬 맞추기 위해 spacer 추가
+    const dSpacer=colIdx===0?'':``; 
     return `<div class="q-dw-col">
       <div class="q-dw-section">
         ${dHdr}
@@ -995,18 +1041,23 @@ function renderDeck(){
     const resCls=m.result==='W'?'W':m.result==='L'?'L':'Q';
     const resLbl=m.result==='W'?'승':m.result==='L'?'패':'?';
     const dt=m.matchAt?new Date(m.matchAt).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
-    return `<div class="opp-row" title="${dt}">
-      <span class="opp-coin ${coinCls}" onclick="toggleMatchCoin('${a}','${s}',${i})" title="${dt} · 클릭으로 선/후 전환">${coinLbl}</span>
-      <select class="opp-cls-sel" onchange="updateMatch('${a}','${s}',${i},'cls',this.value)">
-        <option value="">—</option>${CLS_ORDER.map(c=>`<option value="${c}"${c===m.cls?' selected':''}>${CLS_S[c]||c}</option>`).join('')}
-      </select>
-      <span class="opp-result-tog ${resCls}" onclick="toggleMatchResult('${a}','${s}',${i})" title="클릭 전환">${resLbl}</span>
-      <input class="opp-inp" type="text" placeholder="배틀태그" value="${(m.btag||'').replace(/"/g,'&quot;')}"
-        oninput="updateMatch('${a}','${s}',${i},'btag',this.value)">
-      <input class="opp-inp" type="text" placeholder="상대 전설" value="${(m.oppLeg||'').replace(/"/g,'&quot;')}"
-        oninput="updateMatch('${a}','${s}',${i},'oppLeg',this.value)">
-      <input class="opp-inp" type="text" placeholder="메모" value="${(m.note||'').replace(/"/g,'&quot;')}"
-        oninput="updateMatch('${a}','${s}',${i},'note',this.value)">
+    return `<div class="opp-row">
+      <div class="opp-row-main">
+        <span class="opp-coin ${coinCls}" onclick="toggleMatchCoin('${a}','${s}',${i})" title="선/후 전환">${coinLbl}</span>
+        <select class="opp-cls-sel" onchange="updateMatch('${a}','${s}',${i},'cls',this.value)">
+          <option value="">—</option>${CLS_ORDER.map(c=>`<option value="${c}"${c===m.cls?' selected':''}>${CLS_S[c]||c}</option>`).join('')}
+        </select>
+        <span class="opp-result-tog ${resCls}" onclick="toggleMatchResult('${a}','${s}',${i})" title="클릭 전환">${resLbl}</span>
+        <span class="opp-date-sm">${dt}</span>
+      </div>
+      <div class="opp-row-sub">
+        <input class="opp-inp" type="text" placeholder="배틀태그" value="${(m.btag||'').replace(/"/g,'&quot;')}"
+          oninput="updateMatch('${a}','${s}',${i},'btag',this.value)">
+        <input class="opp-inp" type="text" placeholder="상대 전설" value="${(m.oppLeg||'').replace(/"/g,'&quot;')}"
+          oninput="updateMatch('${a}','${s}',${i},'oppLeg',this.value)">
+        <input class="opp-inp" type="text" placeholder="메모" value="${(m.note||'').replace(/"/g,'&quot;')}"
+          oninput="updateMatch('${a}','${s}',${i},'note',this.value)">
+      </div>
     </div>`;
   }).join('');
   const foldBtn=opps.length>3?`<button class="opp-fold-btn" onclick="foldedOpps=!foldedOpps;renderDeck()">${foldedOpps?`펼치기(${opps.length})`: '접기'}</button>`:'';
@@ -1016,23 +1067,19 @@ function renderDeck(){
     <div class="co-msg">${dk.wins>=MAX_W?'12승 달성!':'3패 종료'}</div>
     <button class="btn gold" onclick="promptReward('${a}','${s}')">보상 및 평점 입력</button>
     <button class="btn sm" onclick="finalizeDeck('${a}','${s}','complete');render()">보상 없이 완료</button>
-    <button class="btn sm" style="border-color:var(--text3);color:var(--text3);font-size:11px;margin-top:2px" onclick="undoComplete('${a}','${s}')">↩ 실수로 눌렀어요</button>
   </div>`:'';
   // 매치 결과 기반 시퀀스 pip 생성 (최신이 앞에 있으므로 reverse)
   const matchSeq=[...opps].reverse().map(m=>m.result); // 'W','L','Q' 시간순
   // 남은 슬롯: 12승 or 3패까지
   const seqPips=()=>{
-    // 표시 슬롯 = wins + MAX_L (승 수만큼 초록 + 패 수만큼 빨강 + 나머지 빈칸)
-    // 최소 MAX_L개, 최대 MAX_W+MAX_L개
-    const totalSlots=dk.wins+MAX_L; // 현재 승 + 3패 슬롯
     let html='';
-    // 시간순(오래된→최신) 매치 결과
-    for(let i=0;i<totalSlots;i++){
-      const r=matchSeq[i]; // undefined면 빈 슬롯
-      if(r==='W')html+=`<div class="seq-pip w"></div>`;
-      else if(r==='L')html+=`<div class="seq-pip l"></div>`;
-      else html+=`<div class="seq-pip empty"></div>`;
-    }
+    // 최대 15칸 (12W + 3L)을 매치 순서대로
+    const filled=matchSeq.filter(r=>r==='W'||r==='L');
+    filled.forEach(r=>{html+=`<div class="seq-pip ${r==='W'?'w':'l'}"></div>`;});
+    // 남은 빈 칸 (최대 표시: 승 남은 것 + 패 남은 것)
+    const remW=MAX_W-dk.wins;const remL=MAX_L-dk.losses;
+    const remTotal=Math.min(remW+remL,MAX_W+MAX_L-filled.length);
+    for(let i=0;i<Math.min(remTotal,6);i++)html+=`<div class="seq-pip empty"></div>`;
     return html;
   };
   area.innerHTML=`<div class="deck-card">
@@ -1077,9 +1124,9 @@ function renderDeck(){
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
         ${foldBtn}
       </div>
-      <div style="font-size:10px;color:var(--text3);padding:2px 8px 1px;display:grid;grid-template-columns:20px 48px 24px 1fr 1fr 1fr;gap:3px">
-        <span style="text-align:center">선/후</span><span style="text-align:center">직업</span><span style="text-align:center">결과</span>
-        <span>배틀태그</span><span>상대 전설</span><span>메모</span>
+      <div style="font-size:11px;color:var(--text3);padding:0 10px 2px;display:flex;gap:8px">
+        <span style="width:28px;text-align:center">선/후</span>
+        <span style="flex:1">클래스 · 결과</span>
       </div>
       <div>${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>
     </div>

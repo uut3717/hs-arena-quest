@@ -142,12 +142,12 @@ button{cursor:pointer;}
 .pb{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
 .pb-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .3s;}
 
-/* Quest item — 인게임 세로 비율(약 1:1.4) */
-.qi{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 11px;cursor:default;min-height:130px;display:flex;flex-direction:column;}
+/* Quest item — 가로:세로 = 7:8 */
+.qi{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 11px;cursor:default;aspect-ratio:7/8;display:flex;flex-direction:column;}
 .qi.done{opacity:.4;}
 .qi.drag-over{border-color:var(--gold);}
 /* Empty slot */
-.qi-empty{background:var(--bg3);border:1px dashed var(--border);border-radius:8px;padding:10px 11px;min-height:130px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,background .15s;}
+.qi-empty{background:var(--bg3);border:1px dashed var(--border);border-radius:8px;padding:10px 11px;aspect-ratio:7/8;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,background .15s;}
 .qi-empty:hover{border-color:var(--gold);background:var(--bg4);}
 .qi-empty span{font-size:12px;color:var(--text3);}
 .qi-empty:hover span{color:var(--gold);}
@@ -168,6 +168,40 @@ button{cursor:pointer;}
 .prog-sep{font-size:11px;color:var(--text3);}
 .prog-tgt{font-size:12px;color:var(--text2);flex-shrink:0;}
 .prog-input{width:46px;font-family:var(--ft);font-size:13px;text-align:right;color:var(--gold);background:var(--bg2);border:1px solid var(--gold);border-radius:4px;padding:1px 3px;}
+
+/* ── SIDE MEMO PANEL (데스크탑: 콘텐츠 우측 고정) ── */
+.side-memo{position:fixed;top:80px;width:200px;max-height:calc(100vh - 100px);display:flex;flex-direction:column;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;z-index:50;transition:right .2s;}
+.side-memo-hdr{padding:8px 12px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;flex-shrink:0;}
+.side-memo-hdr-title{font-family:var(--ft);font-size:11px;color:var(--gold);letter-spacing:.08em;}
+.side-memo-body{flex:1;overflow-y:auto;padding:8px;}
+.side-memo-item{margin-bottom:8px;}
+.side-memo-item-title{font-size:11px;color:var(--text3);margin-bottom:3px;font-weight:500;}
+.side-memo-item textarea{width:100%;min-height:60px;font-size:12px;resize:vertical;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 7px;color:var(--text1);}
+.side-memo-item textarea:focus{border-color:var(--gold);outline:none;}
+.side-memo-add{width:100%;padding:5px;background:none;border:1px dashed var(--border);border-radius:5px;font-size:11px;color:var(--text3);cursor:pointer;margin-top:2px;}
+.side-memo-add:hover{color:var(--gold);border-color:var(--gold);}
+
+/* ── MOBILE BOTTOM MEMO ── */
+.mobile-memo{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--bg2);border-top:1px solid var(--border2);transition:transform .25s;}
+.mobile-memo.collapsed{transform:translateY(calc(100% - 42px));}
+.mobile-memo-tab{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.mobile-memo-tab-title{font-family:var(--ft);font-size:12px;color:var(--gold);letter-spacing:.06em;}
+.mobile-memo-tab-icon{font-size:12px;color:var(--text3);}
+.mobile-memo-body{padding:8px 12px 16px;max-height:40vh;overflow-y:auto;}
+.mobile-memo-item{margin-bottom:8px;}
+.mobile-memo-item-title{font-size:11px;color:var(--text3);margin-bottom:3px;}
+.mobile-memo-item textarea{width:100%;min-height:55px;font-size:13px;resize:none;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text1);}
+.mobile-memo-item textarea:focus{border-color:var(--gold);outline:none;}
+
+@media(max-width:900px){
+  .side-memo{display:none !important;}
+  .mobile-memo{display:block;}
+  /* 모바일에서 메모 패딩 확보 */
+  #pageMain > div{padding-bottom:50px;}
+}
+@media(min-width:901px){
+  .mobile-memo{display:none !important;}
+}
 
 /* ── DECK SECTION ── */
 .deck-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;position:relative;margin-bottom:8px;}
@@ -795,8 +829,8 @@ function deleteRatingEntry(ri){const r=getRatings();r.splice(ri,1);saveRatings(r
 function toggleRF(type,val){ratingFilter[type][val]=!ratingFilter[type][val];const el=document.getElementById(type==='acc'?`rta-${val}`:`rts-${val}`);if(el){el.classList.toggle('on',ratingFilter[type][val]);if(type==='acc'){el.classList.toggle(val==='T'?'t':'h',ratingFilter[type][val]);}}renderRatingPage();}
 
 /* ════════ MEMO ════════ */
-function addMemoCard(){const m=getMemos();m.push({id:'m_'+Date.now(),title:'메모 '+(m.length+1),body:''});saveMemos(m);renderMemoPage();}
-function deleteMemoCard(idx){if(!confirm('메모를 삭제할까요?'))return;const m=getMemos();m.splice(idx,1);saveMemos(m);renderMemoPage();}
+function addMemoCard(){const m=getMemos();m.push({id:'m_'+Date.now(),title:'메모 '+(m.length+1),body:''});saveMemos(m);renderMemoPage();renderSideMemo();}
+function deleteMemoCard(idx){if(!confirm('메모를 삭제할까요?'))return;const m=getMemos();m.splice(idx,1);saveMemos(m);renderMemoPage();renderSideMemo();}
 function updateMemoField(idx,field,val){const m=getMemos();m[idx][field]=val;saveMemos(m);}
 function memoDragStart(e,idx){memoDragSrc=idx;e.dataTransfer.effectAllowed='move';}
 function memoDragOver(e,idx){e.preventDefault();document.querySelectorAll('.memo-item').forEach((el,i)=>el.classList.toggle('drag-over-memo',i===idx&&i!==memoDragSrc));}
@@ -1025,8 +1059,8 @@ function renderQuests(){
       </div>
       ${xp.max>0?`<div class="xp-pb-wrap"><div class="pb"><div class="pb-fill" style="width:${xpPct}%"></div></div></div>`:''}
       <div class="${evCol?'event-body collapsed':'event-body'}">
-        ${q.event.map((item,i)=>makeQi(item,'event',i)).join('')}
-        ${makeEmptySlot('event')}
+        ${q.event.slice(0,2).map((item,i)=>makeQi(item,'event',i)).join('')}
+        ${q.event.length<2?makeEmptySlot('event'):''}
       </div>
     </div>
   `;
@@ -1363,13 +1397,88 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ════════ MAIN ════════ */
-function render(){renderNavGrid();renderResetTimers();renderDeck();renderQuests();}
+function render(){renderNavGrid();renderResetTimers();renderDeck();renderQuests();renderSideMemo();}
 // 앱은 로그인 후에만 표시 — 초기 render() 호출 없음
 const originEl=document.getElementById('currentOrigin');
 if(originEl)originEl.textContent=location.origin;
 setInterval(()=>{if(gToken)renderResetTimers();},60000);
-window.addEventListener('resize',()=>{if(curPage==='rating')drawRatingChart(getRatings().filter(r=>ratingFilter.acc[r.acc]&&ratingFilter.srv[r.srv]));});
+window.addEventListener('resize',()=>{
+  if(curPage==='rating')drawRatingChart(getRatings().filter(r=>ratingFilter.acc[r.acc]&&ratingFilter.srv[r.srv]));
+  positionSideMemo();
+});
 window.addEventListener('load',()=>initGSI());
+
+/* ════════ SIDE MEMO ════════ */
+let mobileMemoCollapsed=true;
+
+function positionSideMemo(){
+  const panel=document.getElementById('sideMemoPanel');
+  if(!panel)return;
+  // 콘텐츠 800px 기준, 우측 여백 중앙에 배치
+  const contentW=800;
+  const vw=window.innerWidth;
+  const gap=16;
+  const panelW=200;
+  const rightEdge=(vw-contentW)/2; // 콘텐츠 오른쪽 여백 시작
+  if(rightEdge>panelW+gap*2){
+    panel.style.right=Math.max(gap, rightEdge-panelW-gap)+'px';
+    panel.style.display='flex';
+  } else {
+    panel.style.display='none';
+  }
+}
+
+function renderSideMemo(){
+  const memos=getMemos();
+  // Side panel
+  let sp=document.getElementById('sideMemoPanel');
+  if(!sp){
+    sp=document.createElement('div');
+    sp.id='sideMemoPanel';
+    sp.className='side-memo';
+    document.body.appendChild(sp);
+  }
+  sp.innerHTML=`
+    <div class="side-memo-hdr">
+      <span class="side-memo-hdr-title">📝 MEMO</span>
+      <button onclick="addMemoCard();renderSideMemo()" style="background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer" title="메모 추가">＋</button>
+    </div>
+    <div class="side-memo-body">
+      ${memos.map((m,i)=>`
+        <div class="side-memo-item">
+          <div class="side-memo-item-title">${(m.title||'메모').replace(/</g,'&lt;')}</div>
+          <textarea oninput="updateMemoField(${i},'body',this.value);renderSideMemo()"
+            onfocus="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+            placeholder="내용...">${m.body||''}</textarea>
+        </div>`).join('')}
+      <button class="side-memo-add" onclick="addMemoCard();renderSideMemo()">+ 메모 추가</button>
+    </div>`;
+  positionSideMemo();
+
+  // Mobile bottom panel
+  let mp=document.getElementById('mobileMemoPanel');
+  if(!mp){
+    mp=document.createElement('div');
+    mp.id='mobileMemoPanel';
+    mp.className='mobile-memo'+(mobileMemoCollapsed?' collapsed':'');
+    document.body.appendChild(mp);
+  }
+  mp.className='mobile-memo'+(mobileMemoCollapsed?' collapsed':'');
+  mp.innerHTML=`
+    <div class="mobile-memo-tab" onclick="mobileMemoCollapsed=!mobileMemoCollapsed;renderSideMemo()">
+      <span class="mobile-memo-tab-title">📝 MEMO</span>
+      <span class="mobile-memo-tab-icon">${mobileMemoCollapsed?'▲':'▼'}</span>
+    </div>
+    <div class="mobile-memo-body">
+      ${memos.map((m,i)=>`
+        <div class="mobile-memo-item">
+          <div class="mobile-memo-item-title">${(m.title||'메모').replace(/</g,'&lt;')}</div>
+          <textarea rows="3" oninput="updateMemoField(${i},'body',this.value)"
+            placeholder="내용...">${m.body||''}</textarea>
+        </div>`).join('')}
+      <button class="side-memo-add" onclick="addMemoCard();renderSideMemo()">+ 메모 추가</button>
+    </div>`;
+}
 </script>
 </body>
 </html>

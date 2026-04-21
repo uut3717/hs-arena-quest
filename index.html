@@ -874,7 +874,7 @@ function exportJSON(){const data={};for(let i=0;i<localStorage.length;i++){const
 function importJSON(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!confirm('덮어씁니다. 계속할까요?'))return;Object.entries(data).forEach(([k,v])=>localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v)));alert('완료! 새로고침합니다.');location.reload();}catch{alert('파일 형식 오류');}};reader.readAsText(file);}
 
 /* ════════ RENDER: NAV GRID ════════
-  Layout: [T] [NA_tab/rating] [EU_tab/rating] [ASIA_tab/rating] | [H] [NA_tab/rating] [EU_tab/rating] [ASIA_tab/rating]
+  Layout: T행 / H행 — 각 행: [계정라벨] [NA] [EU] [ASIA]
 */
 function renderNavGrid(){
   const now=new Date();const krH=(now.getUTCHours()+9)%24;const krM=now.getUTCMinutes();
@@ -883,46 +883,49 @@ function renderNavGrid(){
     if(ml===60)ml=0;else hl-=1;if(hl<0)hl+=24;
     return `${hl}:${String(ml).padStart(2,'0')}`;
   }
-  let h=`<div style="display:flex;align-items:flex-start;justify-content:center;gap:0;flex-wrap:wrap">`;
-  ACCOUNTS.forEach((a,ai)=>{
+  function makeRow(a){
     const accColor=a==='T'?'var(--t-acc)':'var(--h-acc)';
-    if(ai>0)h+=`<div style="width:1px;background:var(--border);margin:0 16px;align-self:stretch;"></div>`;
-    h+=`<div style="display:flex;align-items:flex-start;gap:0">`;
-    h+=`<div style="display:flex;align-items:center;padding:8px 12px 0 0;font-family:var(--ft);font-size:15px;font-weight:600;color:${accColor};letter-spacing:.08em">${a}</div>`;
+    let row=`<div style="display:flex;align-items:flex-start;justify-content:center;gap:0;">`;
+    // 계정 라벨
+    row+=`<div style="display:flex;align-items:center;padding:10px 14px 0 0;font-family:var(--ft);font-size:16px;font-weight:600;color:${accColor};letter-spacing:.08em;flex-shrink:0;">${a}</div>`;
     SERVERS.forEach(s=>{
       const isActive=a===curAcc&&s===curSrv;
       const m=getMeta(a,s);
       const xp=getXP(a,s);
-      const ratingVal=m.rating||'';
-      // rating input id for wheel/keyboard attachment
       const rid=`rating_${a}_${s}`;
       const xid=`xpval_${a}_${s}`;
-      h+=`<div style="display:flex;flex-direction:column;align-items:stretch;margin:0 5px;">
+      // 활성 서버는 리셋 타이머 때문에 패딩 더 줌
+      const boxPad=isActive?'8px 12px 10px':'6px 10px';
+      row+=`<div style="display:flex;flex-direction:column;align-items:stretch;margin:0 5px;">
         <button class="stab acc-${a}${isActive?' active':''}" onclick="curAcc='${a}';curSrv='${s}';foldedOpps=false;render()">
           <span class="dot${getDeck(a,s)?' has-deck':''}"></span>${s}
         </button>
-        <div style="border:1px solid ${isActive?'var(--acc)':'var(--border)'};border-top:none;border-radius:0 0 var(--r) var(--r);background:var(--bg2);padding:6px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:80px;">
-          <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:center;">
+        <div style="border:1px solid ${isActive?'var(--acc)':'var(--border)'};border-top:none;border-radius:0 0 var(--r) var(--r);background:var(--bg2);padding:${boxPad};display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px;">
+          <div style="display:flex;align-items:center;gap:5px;justify-content:center;">
             <span style="font-size:11px;color:var(--text3);">평점</span>
-            <input id="${rid}" type="number" value="${ratingVal}" placeholder="—"
+            <input id="${rid}" type="number" value="${m.rating||''}" placeholder="—"
               onfocus="this.select()"
               onchange="saveRatingField('${a}','${s}',this.value);renderNavGrid()"
               onkeydown="navRatingKey(event,'${a}','${s}',this)"
-              style="background:none;border:none;padding:2px 0;width:66px;font-size:18px;font-family:var(--ft);color:var(--gold);text-align:center;outline:none;-moz-appearance:textfield;">
+              style="background:none;border:none;padding:1px 0;width:68px;font-size:18px;font-family:var(--ft);color:var(--gold);text-align:center;outline:none;-moz-appearance:textfield;">
           </div>
-          <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:center;padding:2px 0;">
+          <div style="display:flex;align-items:center;gap:5px;justify-content:center;">
             <span style="font-size:11px;color:var(--text3);">XP</span>
-            <span id="${xid}" style="font-size:16px;font-family:var(--ft);color:${isActive?'var(--gold)':'var(--text3)'};cursor:${isActive?'pointer':'default'};padding:2px 4px;" title="${isActive?'휠=50, 위아래키=1':''}">${xp.cur||0}</span>
+            <span id="${xid}" style="font-size:16px;font-family:var(--ft);color:${isActive?'var(--gold)':'var(--text3)'};cursor:${isActive?'pointer':'default'};padding:1px 4px;" title="${isActive?'휠=50, ↑↓=1':''}">${xp.cur||0}</span>
           </div>
-          ${isActive?`<div class="reset-inline">리셋 <span id="resetTimer">${resetStr(s)}</span></div>`:''}
+          ${isActive?`<div class="reset-inline" style="padding-top:2px;">리셋 <span id="resetTimer">${resetStr(s)}</span></div>`:''}
         </div>
       </div>`;
     });
-    h+=`</div>`;
-  });
-  h+=`</div>`;
-  document.getElementById('navGrid').innerHTML=h;
-  // Attach wheel + keyboard to all rating inputs
+    row+=`</div>`;
+    return row;
+  }
+  document.getElementById('navGrid').innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      ${makeRow('T')}
+      ${makeRow('H')}
+    </div>`;
+  // wheel + keyboard 이벤트 부착
   ACCOUNTS.forEach(a=>SERVERS.forEach(s=>{
     const el=document.getElementById(`rating_${a}_${s}`);
     if(el){
@@ -932,10 +935,8 @@ function renderNavGrid(){
         const nv=Math.max(0,v+(e.deltaY<0?50:-50));
         el.value=nv;
         saveRatingField(a,s,nv);
-        document.getElementById(`rating_${a}_${s}`).value=nv;
       },{passive:false});
     }
-    // XP wheel on active server display
     const xel=document.getElementById(`xpval_${a}_${s}`);
     if(xel&&a===curAcc&&s===curSrv){
       xel.addEventListener('wheel',e=>{

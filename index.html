@@ -1326,24 +1326,32 @@ function renderRecords(){
   window._filteredHist=filtered;
   const n=filtered.length,tg=filtered.reduce((s,h)=>s+(h.wins+h.losses),0),tw=filtered.reduce((s,h)=>s+h.wins,0);
   const avgW=n?(tw/n).toFixed(2):0,wPct=tg?Math.round(tw/tg*100):0,d12=filtered.filter(h=>h.wins>=12).length;
-  // Gold value: gold + audienceBonus(1000) + ticket*150 (pack = 0)
-  const calcGold=rew=>rew?(rew.gold||0)+(rew.audienceBonus?1000:0)+(rew.ticket||0)*150:0;
-  const tGold=filtered.reduce((s,h)=>s+calcGold(h.reward),0);
+  const ENTRY_FEE=300;
+  // 보상 골드환산: gold + audienceBonus(1000) + ticket*150, pack=0
+  const calcReward=rew=>rew?(rew.gold||0)+(rew.audienceBonus?1000:0)+(rew.ticket||0)*150:0;
+  // 정산: 보상 - 입장료
+  const calcSettle=rew=>calcReward(rew)-ENTRY_FEE;
+  const tReward=filtered.reduce((s,h)=>s+calcReward(h.reward),0);
+  const tSettle=filtered.reduce((s,h)=>s+calcSettle(h.reward),0);
+  const settleColor=tSettle>=0?'var(--win)':'var(--loss)';
+  const settleSign=tSettle>=0?'+':'';
   document.getElementById('statsGrid').innerHTML=`
     <div class="scard"><div class="val">${n}</div><div class="lbl">총 덱</div></div>
     <div class="scard"><div class="val">${avgW}</div><div class="lbl">평균 승수</div></div>
     <div class="scard"><div class="val">${wPct}%</div><div class="lbl">게임 승률</div></div>
     <div class="scard"><div class="val">${d12}</div><div class="lbl">12승 덱</div></div>
-    <div class="scard"><div class="val">${tGold?tGold+'🪙':0}</div><div class="lbl">보상 골드환산</div></div>
+    <div class="scard"><div class="val">${tReward?tReward+'🪙':0}</div><div class="lbl">총 보상</div></div>
+    <div class="scard"><div class="val" style="color:${settleColor}">${settleSign}${tSettle}🪙</div><div class="lbl">총 정산</div></div>
     <div class="scard"><div class="val">${tg}</div><div class="lbl">총 게임</div></div>`;
   if(!n){document.getElementById('histTableWrap').innerHTML=`<div style="padding:24px;text-align:center;color:var(--text3)">기록 없음</div>`;return;}
   const rows=filtered.map((h,vi)=>{
     const sc=h.wins>=12?'g':h.wins>=7?'gr':'r';const cd=h.completedAt?new Date(h.completedAt).toLocaleDateString('ko-KR'):'';
     const rew=h.reward;
-    // 목록에선 골드 환산값만 표시
-    const goldVal=calcGold(rew);
-    const rewStr=rew?(goldVal?`🪙${goldVal}`+(rew.etc?` ${rew.etc}`:''):'—'):'—';
-    // 결과: 12승이면 "12승 N패", 아니면 "N승" (어차피 3패)
+    const rewardVal=calcReward(rew);
+    const settleVal=calcSettle(rew);
+    const sc2=settleVal>=0?'var(--win)':'var(--loss)';
+    const settleStr=(settleVal>=0?'+':'')+settleVal+'🪙';
+    const rewStr=rew?(rewardVal?`🪙${rewardVal}`+(rew.etc?` ${rew.etc}`:''):'—'):'—';
     const resultStr=h.wins>=12?`${h.wins}승 ${h.losses}패`:`${h.wins}승`;
     return `<tr style="cursor:pointer" ondblclick="openHistDetail(${vi})">
       <td><span class="hs ${sc}">${resultStr}</span></td>
@@ -1351,13 +1359,14 @@ function renderRecords(){
       <td style="color:var(--text2)">${CLS_S[h.cls]||h.cls||'—'}</td>
       <td style="color:var(--text2);font-size:12px">${h.myLeg||'—'}</td>
       <td style="font-size:12px;color:var(--text2)">${rewStr}</td>
+      <td style="font-size:13px;font-family:var(--ft);color:${sc2};white-space:nowrap">${rew?settleStr:'—'}</td>
       <td style="font-size:11px;color:var(--text3);white-space:nowrap">${cd}</td>
       <td><button class="btn xs red" onclick="event.stopPropagation();delHist(${vi})">삭제</button></td>
     </tr>`;
   }).join('');
   document.getElementById('histTableWrap').innerHTML=`
-    <table class="hist-table"><thead><tr><th>결과</th><th>계정/서버</th><th>클래스</th><th>내 전설</th><th>보상</th><th>날짜</th><th></th></tr></thead><tbody>${rows}</tbody></table>
-    <div style="font-size:11px;color:var(--text3);padding:6px 10px">더블클릭으로 상세 보기</div>`;
+    <table class="hist-table"><thead><tr><th>결과</th><th>계정/서버</th><th>클래스</th><th>내 전설</th><th>보상</th><th>정산</th><th>날짜</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+    <div style="font-size:11px;color:var(--text3);padding:6px 10px">더블클릭으로 상세 보기 · 정산 = 보상 − 입장료 300골드</div>`;
 }
 function toggleHF(type,val){histFilter[type][val]=!histFilter[type][val];renderRecords();}
 function toggleHCls(val){histFilter.cls=histFilter.cls===val?null:val;renderRecords();}

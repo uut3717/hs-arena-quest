@@ -621,10 +621,14 @@ async function loadFromCloud(){
     if(!driveFileId){setSyncStatus('ok','Drive 연동됨 (새 파일)');return;}
     const meta=await apiReq('GET',`${DRIVE_API}/files/${driveFileId}?alt=media`);
     if(meta&&typeof meta==='object'){
-      Object.entries(meta).forEach(([k,v])=>localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v)));
+      // Drive에서 받은 값은 이미 JS 객체로 파싱됨
+      // localStorage는 항상 string이어야 하므로 JSON.stringify 통일
+      Object.entries(meta).forEach(([k,v])=>{
+        localStorage.setItem(k, JSON.stringify(v));
+      });
       setSyncStatus('ok','Drive에서 불러옴');
     }
-  }catch(e){setSyncStatus('err','불러오기 실패');}
+  }catch(e){setSyncStatus('err','불러오기 실패: '+e.message);}
 }
 async function forceSyncToCloud(){
   if(!gToken){alert('먼저 Google 로그인을 해주세요.');return;}
@@ -633,26 +637,56 @@ async function syncToCloud(){
   if(!gToken)return;
   setSyncStatus('spin','저장 중...');
   try{
+    // localStorage에서 hs4_/aq_ 키만 수집 — gd()로 파싱된 JS 값
     const data={};
-    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('hs4_')||k.startsWith('aq_'))data[k]=gd(k,null);}
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k.startsWith('hs4_')||k.startsWith('aq_'))data[k]=gd(k,null);
+    }
     const blob=JSON.stringify(data);
     if(!driveFileId)driveFileId=await findDriveFile();
     if(driveFileId){
-      await fetch(`${DRIVE_UPLOAD}/files/${driveFileId}?uploadType=media`,{method:'PATCH',headers:{'Authorization':'Bearer '+gToken,'Content-Type':'application/json'},body:blob});
+      const r=await fetch(`${DRIVE_UPLOAD}/files/${driveFileId}?uploadType=media`,{
+        method:'PATCH',
+        headers:{'Authorization':'Bearer '+gToken,'Content-Type':'application/json'},
+        body:blob
+      });
+      if(!r.ok){setSyncStatus('err','저장 실패 ('+r.status+')');return;}
     }else{
       const boundary='aqboundary';
       const body=`--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify({name:FILE_NAME,parents:['appDataFolder']})}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${blob}\r\n--${boundary}--`;
-      const r=await fetch(`${DRIVE_UPLOAD}/files?uploadType=multipart`,{method:'POST',headers:{'Authorization':'Bearer '+gToken,'Content-Type':`multipart/related; boundary=${boundary}`},body});
+      const r=await fetch(`${DRIVE_UPLOAD}/files?uploadType=multipart`,{
+        method:'POST',
+        headers:{'Authorization':'Bearer '+gToken,'Content-Type':`multipart/related; boundary=${boundary}`},
+        body
+      });
+      if(!r.ok){setSyncStatus('err','저장 실패 ('+r.status+')');return;}
       const j=await r.json();driveFileId=j?.id;
     }
     setSyncStatus('ok','Drive에 저장됨');
-  }catch(e){setSyncStatus('err','저장 실패');}
+  }catch(e){setSyncStatus('err','저장 실패: '+e.message);}
 }
 let syncTimer=null;
 function scheduleSyncToCloud(){
   if(!gToken)return;
-  clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncToCloud(),3000);
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(()=>syncToCloud(),1500); // 3초→1.5초로 단축
 }
+// 페이지 떠날 때 즉시 동기 저장 시도 (sendBeacon 사용)
+window.addEventListener('beforeunload',()=>{
+  if(!gToken||!driveFileId)return;
+  const data={};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k.startsWith('hs4_')||k.startsWith('aq_'))data[k]=gd(k,null);
+  }
+  const blob=JSON.stringify(data);
+  // sendBeacon은 비동기지만 브라우저가 보장함
+  navigator.sendBeacon&&navigator.sendBeacon(
+    `${DRIVE_UPLOAD}/files/${driveFileId}?uploadType=media`,
+    new Blob([blob],{type:'application/json'})
+  );
+});
 
 /* ════════ CONSTANTS ════════ */
 const ACCOUNTS=['T','H'];

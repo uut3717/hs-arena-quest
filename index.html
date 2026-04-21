@@ -139,8 +139,8 @@ button{cursor:pointer;}
 .xp-pb-wrap{margin-top:4px;}
 /* old xp-card kept for reference but unused */
 .xp-inputs input{width:64px;font-size:13px;font-family:var(--ft);color:var(--gold);text-align:center;}
-.pb{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
-.pb-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .3s;}
+.pb{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;cursor:pointer;}
+.pb-fill{height:100%;background:var(--gold);border-radius:4px;transition:width .3s;}
 
 /* Quest item — 가로:세로 = 7:8 */
 .qi{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 11px;cursor:default;aspect-ratio:7/8;display:flex;flex-direction:column;}
@@ -160,14 +160,14 @@ button{cursor:pointer;}
 .qi-edit-btn,.qi-del-btn{background:none;border:none;font-size:12px;padding:1px 3px;color:var(--text3);line-height:1;}
 .qi-edit-btn:hover{color:var(--gold);}
 .qi-del-btn:hover{color:var(--loss);}
-/* Progress */
-.qi-prog-row{display:flex;align-items:center;gap:5px;}
+/* Progress — 바 영역 전체 클릭/휠 가능하게 padding 확보 */
+.qi-prog-row{display:flex;align-items:center;gap:5px;padding:4px 0;}
 .qi-prog-row .pb{flex:1;}
-.prog-text{font-family:var(--ft);font-size:13px;color:var(--gold);cursor:pointer;min-width:28px;text-align:right;flex-shrink:0;}
+.prog-text{font-family:var(--ft);font-size:15px;color:var(--gold);cursor:pointer;min-width:32px;text-align:right;flex-shrink:0;}
 .prog-text:hover{color:var(--gold2);}
-.prog-sep{font-size:11px;color:var(--text3);}
-.prog-tgt{font-size:12px;color:var(--text2);flex-shrink:0;}
-.prog-input{width:46px;font-family:var(--ft);font-size:13px;text-align:right;color:var(--gold);background:var(--bg2);border:1px solid var(--gold);border-radius:4px;padding:1px 3px;}
+.prog-sep{font-size:12px;color:var(--text3);}
+.prog-tgt{font-size:14px;color:var(--text2);flex-shrink:0;}
+.prog-input{width:50px;font-family:var(--ft);font-size:15px;text-align:right;color:var(--gold);background:var(--bg2);border:1px solid var(--gold);border-radius:4px;padding:2px 4px;}
 
 /* ── SIDE MEMO PANEL (데스크탑: 콘텐츠 우측 고정) ── */
 .side-memo{position:fixed;top:80px;width:200px;max-height:calc(100vh - 100px);display:flex;flex-direction:column;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;z-index:50;transition:right .2s;}
@@ -391,8 +391,6 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
       <button class="btn sm nav-active" id="nav-main" onclick="showPage('main')">덱/퀘스트</button>
       <button class="btn sm" id="nav-rating" onclick="showPage('rating')">📈 평점</button>
       <button class="btn sm" id="nav-records" onclick="showPage('records')">📜 전체기록</button>
-      <button class="btn sm" id="nav-memo" onclick="showPage('memo')">📝 메모</button>
-      <button class="btn sm" id="nav-data" onclick="showPage('data')">💾 데이터</button>
     </div>
   </div>
 </div>
@@ -865,7 +863,7 @@ function toggleRF(type,val){ratingFilter[type][val]=!ratingFilter[type][val];con
 /* ════════ MEMO ════════ */
 function addMemoCard(){const m=getMemos();m.push({id:'m_'+Date.now(),title:'메모 '+(m.length+1),body:''});saveMemos(m);renderMemoPage();renderSideMemo();}
 function deleteMemoCard(idx){if(!confirm('메모를 삭제할까요?'))return;const m=getMemos();m.splice(idx,1);saveMemos(m);renderMemoPage();renderSideMemo();}
-function updateMemoField(idx,field,val){const m=getMemos();m[idx][field]=val;saveMemos(m);}
+function updateMemoField(idx,field,val){const m=getMemos();if(!m[idx])return;m[idx][field]=val;saveMemos(m);}
 function memoDragStart(e,idx){memoDragSrc=idx;e.dataTransfer.effectAllowed='move';}
 function memoDragOver(e,idx){e.preventDefault();document.querySelectorAll('.memo-item').forEach((el,i)=>el.classList.toggle('drag-over-memo',i===idx&&i!==memoDragSrc));}
 function memoDrop(e,toIdx){e.preventDefault();document.querySelectorAll('.memo-item').forEach(el=>el.classList.remove('drag-over-memo'));if(memoDragSrc===null||memoDragSrc===toIdx)return;const m=getMemos();const[mv]=m.splice(memoDragSrc,1);m.splice(toIdx,0,mv);saveMemos(m);memoDragSrc=null;renderMemoPage();}
@@ -910,11 +908,11 @@ function renderNavGrid(){
               onfocus="this.select()"
               onchange="saveRatingField('${a}','${s}',this.value);renderNavGrid()"
               onkeydown="navRatingKey(event,'${a}','${s}',this)"
-              style="background:none;border:none;padding:2px 0;width:60px;font-size:15px;font-family:var(--ft);color:var(--gold);text-align:center;outline:none;-moz-appearance:textfield;">
+              style="background:none;border:none;padding:2px 0;width:66px;font-size:18px;font-family:var(--ft);color:var(--gold);text-align:center;outline:none;-moz-appearance:textfield;">
           </div>
           <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:center;padding:2px 0;">
             <span style="font-size:11px;color:var(--text3);">XP</span>
-            <span id="${xid}" style="font-size:13px;font-family:var(--ft);color:${isActive?'var(--gold)':'var(--text3)'};cursor:${isActive?'pointer':'default'};padding:2px 4px;" title="${isActive?'휠=50, 위아래키=1':''}">${xp.cur||0}</span>
+            <span id="${xid}" style="font-size:16px;font-family:var(--ft);color:${isActive?'var(--gold)':'var(--text3)'};cursor:${isActive?'pointer':'default'};padding:2px 4px;" title="${isActive?'휠=50, 위아래키=1':''}">${xp.cur||0}</span>
           </div>
           ${isActive?`<div class="reset-inline">리셋 <span id="resetTimer">${resetStr(s)}</span></div>`:''}
         </div>
@@ -996,6 +994,7 @@ function renderQuests(){
       }
     }
     return `<div class="qi${isDone?' done':''}" data-qi="${type}:${idx}" draggable="true"
+      ondblclick="openQuestEdit('${a}','${s}','${type}',${idx})"
       ondragstart="qiDS(event,'${type}',${idx})" ondragover="qiDO(event,'${type}',${idx})"
       ondragleave="qiDL()" ondrop="qiDrop(event,'${a}','${s}','${type}',${idx})" ondragend="qiDE()">
       <div class="qi-top">
@@ -1407,12 +1406,12 @@ function renderMemoPage(){
 function showPage(name){
   curPage=name;
   ['main','rating','records','memo','data'].forEach(p=>{
-    document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1)).classList.toggle('active',p===name);
+    const pg=document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1));
+    if(pg)pg.classList.toggle('active',p===name);
     const nb=document.getElementById('nav-'+p);if(nb)nb.classList.toggle('nav-active',p===name);
   });
   if(name==='records')renderRecords();
   if(name==='rating')renderRatingPage();
-  if(name==='memo')renderMemoPage();
 }
 
 /* ════════ POPUPS ════════ */
@@ -1475,18 +1474,24 @@ function renderSideMemo(){
   sp.innerHTML=`
     <div class="side-memo-hdr">
       <span class="side-memo-hdr-title">📝 MEMO</span>
-      <button onclick="addMemoCard();renderSideMemo()" style="background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer" title="메모 추가">＋</button>
+      <button onclick="addMemoCard()" style="background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer" title="메모 추가">＋</button>
     </div>
     <div class="side-memo-body">
       ${memos.map((m,i)=>`
         <div class="side-memo-item">
           <div class="side-memo-item-title">${(m.title||'메모').replace(/</g,'&lt;')}</div>
-          <textarea oninput="updateMemoField(${i},'body',this.value);renderSideMemo()"
-            onfocus="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+          <textarea data-memo-idx="${i}"
             placeholder="내용...">${m.body||''}</textarea>
         </div>`).join('')}
-      <button class="side-memo-add" onclick="addMemoCard();renderSideMemo()">+ 메모 추가</button>
+      <button class="side-memo-add" onclick="addMemoCard()">+ 메모 추가</button>
     </div>`;
+  // IME 안전 이벤트: compositionend + blur 로 저장 (oninput X)
+  sp.querySelectorAll('textarea[data-memo-idx]').forEach(el=>{
+    let composing=false;
+    el.addEventListener('compositionstart',()=>composing=true);
+    el.addEventListener('compositionend',()=>{composing=false;updateMemoField(+el.dataset.memoIdx,'body',el.value);});
+    el.addEventListener('input',()=>{if(!composing)updateMemoField(+el.dataset.memoIdx,'body',el.value);});
+  });
   positionSideMemo();
 
   // Mobile bottom panel
@@ -1507,11 +1512,17 @@ function renderSideMemo(){
       ${memos.map((m,i)=>`
         <div class="mobile-memo-item">
           <div class="mobile-memo-item-title">${(m.title||'메모').replace(/</g,'&lt;')}</div>
-          <textarea rows="3" oninput="updateMemoField(${i},'body',this.value)"
+          <textarea rows="3" data-memo-idx="${i}"
             placeholder="내용...">${m.body||''}</textarea>
         </div>`).join('')}
-      <button class="side-memo-add" onclick="addMemoCard();renderSideMemo()">+ 메모 추가</button>
+      <button class="side-memo-add" onclick="addMemoCard()">+ 메모 추가</button>
     </div>`;
+  mp.querySelectorAll('textarea[data-memo-idx]').forEach(el=>{
+    let composing=false;
+    el.addEventListener('compositionstart',()=>composing=true);
+    el.addEventListener('compositionend',()=>{composing=false;updateMemoField(+el.dataset.memoIdx,'body',el.value);});
+    el.addEventListener('input',()=>{if(!composing)updateMemoField(+el.dataset.memoIdx,'body',el.value);});
+  });
 }
 </script>
 </body>

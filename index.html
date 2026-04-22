@@ -632,12 +632,21 @@ async function loadFromCloud(){
     if(!driveFileId){setSyncStatus('ok','Drive 연동됨 (새 파일)');return;}
     const meta=await apiReq('GET',`${DRIVE_API}/files/${driveFileId}?alt=media`);
     if(meta&&typeof meta==='object'){
-      // Drive에서 받은 값은 이미 JS 객체로 파싱됨
-      // localStorage는 항상 string이어야 하므로 JSON.stringify 통일
-      Object.entries(meta).forEach(([k,v])=>{
-        localStorage.setItem(k, JSON.stringify(v));
-      });
-      setSyncStatus('ok','Drive에서 불러옴');
+      // Drive 데이터로 localStorage 업데이트
+      // 단, localStorage에 데이터가 있으면 최신 타임스탬프 기준으로 병합
+      const driveTs=meta['aq_lastSaved']||0;
+      const localTs=gd('aq_lastSaved',0);
+      if(driveTs>=localTs){
+        // Drive가 더 최신 → 전부 덮어쓰기
+        Object.entries(meta).forEach(([k,v])=>{
+          localStorage.setItem(k,JSON.stringify(v));
+        });
+        setSyncStatus('ok','Drive에서 불러옴');
+      } else {
+        // 로컬이 더 최신 → Drive에 바로 업로드
+        setSyncStatus('ok','로컬 데이터가 더 최신');
+        syncToCloud();
+      }
     }
   }catch(e){setSyncStatus('err','불러오기 실패: '+e.message);}
 }
@@ -648,7 +657,9 @@ async function syncToCloud(){
   if(!gToken)return;
   setSyncStatus('spin','저장 중...');
   try{
-    // localStorage에서 hs4_/aq_ 키만 수집 — gd()로 파싱된 JS 값
+    // 저장 타임스탬프 기록
+    const ts=Date.now();
+    localStorage.setItem('aq_lastSaved',JSON.stringify(ts));
     const data={};
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i);
@@ -678,10 +689,14 @@ async function syncToCloud(){
   }catch(e){setSyncStatus('err','저장 실패: '+e.message);}
 }
 let syncTimer=null;
-function scheduleSyncToCloud(){
+function scheduleSyncToCloud(immediate=false){
   if(!gToken)return;
   clearTimeout(syncTimer);
-  syncTimer=setTimeout(()=>syncToCloud(),1500); // 3초→1.5초로 단축
+  if(immediate){
+    syncToCloud();
+  } else {
+    syncTimer=setTimeout(()=>syncToCloud(),800); // 딜레이 최소화
+  }
 }
 // 페이지 떠날 때 즉시 동기 저장 시도 (sendBeacon 사용)
 window.addEventListener('beforeunload',()=>{
@@ -830,19 +845,46 @@ function focusKoreanInput(el){
   el.blur();
   setTimeout(()=>{el.focus();el.select();},80);
 }
-function addQuestItem(a,s,type,idx){
-  const q=getQuests(a,s);
-  if(idx!==undefined&&idx<q[type].length){}// replace empty slot — just add normally
-  q[type].push({id:'q_'+Date.now(),text:'새 퀘스트',target:0,prog:0,done:false});
-  saveQuests(a,s,q);
-  // immediately open edit
-  qeCtx={a,s,type,idx:q[type].length-1};
-  document.getElementById('qe_text').value='새 퀘스트';document.getElementById('qe_target').value=0;
-  showPopup('questEditPopup');setTimeout(()=>{const el=document.getElementById('qe_text');el.select();focusKoreanInput(el);},50);
+function addQuestItem(a,s,type){
+  // 미리 저장하지 않고, 팝업에서 확인 시에만 추가
+  qeCtx={a,s,type,idx:-1}; // idx=-1 = 새 항목
+  document.getElementById('qe_text').value='';
+  document.getElementById('qe_target').value=0;
+  showPopup('questEditPopup');
+  setTimeout(()=>{const el=document.getElementById('qe_text');el.select();focusKoreanInput(el);},50);
 }
 function openQuestEdit(a,s,type,idx){const q=getQuests(a,s);qeCtx={a,s,type,idx};document.getElementById('qe_text').value=q[type][idx].text;document.getElementById('qe_target').value=q[type][idx].target;showPopup('questEditPopup');setTimeout(()=>focusKoreanInput(document.getElementById('qe_text')),50);}
-function saveQuestEdit(){if(!qeCtx)return;const{a,s,type,idx}=qeCtx;const q=getQuests(a,s);q[type][idx].text=document.getElementById('qe_text').value.trim()||'퀘스트';q[type][idx].target=parseInt(document.getElementById('qe_target').value)||0;if(!q[type][idx].target)q[type][idx].prog=0;saveQuests(a,s,q);closePopup('questEditPopup');renderQuests();}
-function deleteQuestItem(){if(!qeCtx)return;const{a,s,type,idx}=qeCtx;const q=getQuests(a,s);q[type].splice(idx,1);saveQuests(a,s,q);closePopup('questEditPopup');renderQuests();}
+function saveQuestEdit(){
+  if(!qeCtx)return;
+  const{a,s,type,idx}=qeCtx;
+  const text=document.getElementById('qe_text').value.trim()||'퀘스트';
+  const target=parseInt(document.getElementById('qe_target').value)||0;
+  const q=getQuests(a,s);
+  if(idx===-1){
+    // 새 퀘스트 추가
+    q[type].push({id:'q_'+Date.now(),text,target,prog:0,done:false});
+  } else {
+    // 기존 수정
+    q[type][idx].text=text;
+    q[type][idx].target=target;
+    if(!target)q[type][idx].prog=0;
+  }
+  saveQuests(a,s,q);
+  closePopup('questEditPopup');
+  qeCtx=null;
+  renderQuests();
+}
+function deleteQuestItem(){
+  if(!qeCtx)return;
+  const{a,s,type,idx}=qeCtx;
+  if(idx===-1){closePopup('questEditPopup');qeCtx=null;return;} // 새 항목이면 그냥 취소
+  const q=getQuests(a,s);
+  q[type].splice(idx,1);
+  saveQuests(a,s,q);
+  closePopup('questEditPopup');
+  qeCtx=null;
+  renderQuests();
+}
 function deleteQuestDirect(a,s,type,idx){const q=getQuests(a,s);q[type].splice(idx,1);saveQuests(a,s,q);renderQuests();}
 /* Progress */
 function startProgEdit(a,s,type,idx){progEditCtx={a,s,type,idx};renderQuests();setTimeout(()=>{const el=document.getElementById(`pe_${a}_${s}_${type}_${idx}`);if(el){el.focus();el.select();}},0);}
@@ -1442,7 +1484,10 @@ function showPage(name){
 
 /* ════════ POPUPS ════════ */
 function showPopup(id){document.getElementById(id).style.display='flex';}
-function closePopup(id){document.getElementById(id).style.display='none';}
+function closePopup(id){
+  document.getElementById(id).style.display='none';
+  if(id==='questEditPopup')qeCtx=null; // 팝업 닫힐 때 항상 초기화
+}
 
 /* ════════ KEYBOARD ════════ */
 document.addEventListener('keydown',e=>{

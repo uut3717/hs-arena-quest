@@ -254,22 +254,23 @@ button{cursor:pointer;}
 .opp-title{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}
 .opp-fold-btn{font-size:11px;color:var(--text3);background:none;border:none;padding:2px 6px;}
 .opp-fold-btn:hover{color:var(--text2);}
-/* Match section wrapper — 덱 카드와 동일 너비 */
-.opp-inner{width:100%;}
+/* Match section wrapper — 덱 score-inner와 동일하게 가운데 400px */
+.opp-inner{max-width:400px;margin:0 auto;}
 /* Match row: 2줄
-   1줄: 선후(22) | 직업(36) | 전설(120px고정) | 결과(32) | 삭제(22)
+   1줄: 선후(30) | 직업(76=class-sel) | 전설(140=deck-my-legend) | 결과(40) | 삭제(24)
    2줄: 배틀태그 | 메모 | 날짜
+   → 덱 헤더와 같은 위치에 정렬
 */
-.opp-row{display:flex;flex-direction:column;gap:3px;padding:5px 12px;border-top:1px solid var(--border);}
+.opp-row{display:flex;flex-direction:column;gap:3px;padding:5px 0;border-top:1px solid var(--border);}
 .opp-row:hover{background:var(--bg3);}
-.opp-row-top{display:grid;grid-template-columns:22px 36px 120px 32px 22px;gap:5px;align-items:center;}
-.opp-row-bot{display:grid;grid-template-columns:1fr 1fr 64px;gap:5px;align-items:center;}
+.opp-row-top{display:grid;grid-template-columns:30px 76px 140px 40px 24px;gap:6px;align-items:center;}
+.opp-row-bot{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:center;}
 .opp-coin{text-align:center;cursor:pointer;font-size:13px;font-weight:700;user-select:none;}
 .opp-coin.first{color:#4a8fd4;}
 .opp-coin.second{color:#c8963e;}
-.opp-cls-sel{font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:3px 1px;width:100%;text-align:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;font-family:var(--ff);}
+.opp-cls-sel{font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:4px 4px;width:100%;text-align:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;font-family:var(--ff);}
 .opp-cls-sel:focus{border-color:var(--gold);outline:none;}
-.opp-leg-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:3px 6px;width:100%;color:var(--text1);font-family:var(--ff);}
+.opp-leg-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:4px 6px;width:100%;color:var(--text1);font-family:var(--ff);}
 .opp-leg-inp::placeholder{color:var(--text3);}
 .opp-leg-inp:focus{outline:1px solid var(--gold);}
 .opp-result-tog{text-align:center;font-size:13px;font-weight:700;padding:3px 4px;border-radius:4px;cursor:pointer;user-select:none;}
@@ -278,7 +279,7 @@ button{cursor:pointer;}
 .opp-result-tog.Q{background:var(--bg3);color:var(--text3);border:1px dashed var(--border);}
 .opp-del-btn{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;text-align:center;padding:0;line-height:1;}
 .opp-del-btn:hover{color:var(--loss);}
-.opp-date-sm{font-size:11px;color:var(--text3);white-space:nowrap;text-align:right;}
+.opp-date-sm{font-size:11px;color:var(--text3);white-space:nowrap;text-align:right;flex-shrink:0;}
 .opp-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:3px 6px;width:100%;color:var(--text2);font-family:var(--ff);}
 .opp-inp::placeholder{color:var(--text3);}
 .opp-inp:focus{outline:1px solid var(--gold);color:var(--text1);}
@@ -1110,23 +1111,18 @@ function renderQuests(){
     </div>
   `;
 
-  // Wheel listeners — 카드 전체 영역에 붙이기
+  // Wheel listeners — target 있는 카드 전체 영역에 붙이기
   setTimeout(()=>{
     ['daily','weekly','event'].forEach(type=>{
       (getQuests(a,s)[type]||[]).forEach((item,idx)=>{
-        if(!item||!item.target)return;
-        // data-qi 속성으로 카드 전체 div 찾기
+        if(!item||!item.target)return; // target=0인 체크박스 퀘스트는 제외
         const card=document.querySelector(`.qi[data-qi="${type}:${idx}"]`);
         if(card)card.addEventListener('wheel',e=>progWheel(e,a,s,type,idx),{passive:false});
       });
     });
-    // XP 카드 전체 영역 휠
-    const xpWrap=document.getElementById(`xpWrap_${a}_${s}`);
-    if(xpWrap){
-      // 이벤트 카드 전체 — q-event-col의 부모 찾아서 붙이기
-      const evCol=xpWrap.closest('.q-event-col');
-      if(evCol)evCol.addEventListener('wheel',e=>xpWheel(e,a,s),{passive:false});
-    }
+    // XP: q-event-col 전체에 붙이기
+    const evColEl=document.querySelector('.q-event-col');
+    if(evColEl)evColEl.addEventListener('wheel',e=>xpWheel(e,a,s),{passive:false});
   },0);
 }
 
@@ -1228,7 +1224,7 @@ function renderDeck(){
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
         ${foldBtn}
       </div>
-      <div style="font-size:10px;color:var(--text3);padding:3px 12px 2px;display:grid;grid-template-columns:22px 36px 120px 32px 22px;gap:5px">
+      <div style="font-size:10px;color:var(--text3);padding:3px 0 2px;max-width:400px;margin:0 auto;display:grid;grid-template-columns:30px 76px 140px 40px 24px;gap:6px">
         <span style="text-align:center">선/후</span><span style="text-align:center">직업</span><span>상대 전설</span><span style="text-align:center">결과</span><span></span>
       </div>
       <div class="opp-inner">${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>

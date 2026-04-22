@@ -256,25 +256,30 @@ button{cursor:pointer;}
 .opp-fold-btn:hover{color:var(--text2);}
 /* Match section wrapper — 덱 카드와 동일 너비 */
 .opp-inner{width:100%;}
-/* Match row: 2줄 */
-.opp-row{display:flex;flex-direction:column;gap:3px;padding:6px 12px;border-top:1px solid var(--border);}
+/* Match row: 2줄
+   1줄: 선후(22) | 직업(36) | 전설(120px고정) | 결과(32) | 삭제(22)
+   2줄: 배틀태그 | 메모 | 날짜
+*/
+.opp-row{display:flex;flex-direction:column;gap:3px;padding:5px 12px;border-top:1px solid var(--border);}
 .opp-row:hover{background:var(--bg3);}
-.opp-row-top{display:grid;grid-template-columns:24px 52px 1fr 36px;gap:6px;align-items:center;}
-.opp-row-bot{display:grid;grid-template-columns:1fr 1fr 64px;gap:6px;align-items:center;}
+.opp-row-top{display:grid;grid-template-columns:22px 36px 120px 32px 22px;gap:5px;align-items:center;}
+.opp-row-bot{display:grid;grid-template-columns:1fr 1fr 64px;gap:5px;align-items:center;}
 .opp-coin{text-align:center;cursor:pointer;font-size:13px;font-weight:700;user-select:none;}
 .opp-coin.first{color:#4a8fd4;}
 .opp-coin.second{color:#c8963e;}
-.opp-cls-sel{font-size:14px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:3px 2px;width:100%;text-align:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;font-family:var(--ff);}
+.opp-cls-sel{font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:3px 1px;width:100%;text-align:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;font-family:var(--ff);}
 .opp-cls-sel:focus{border-color:var(--gold);outline:none;}
-.opp-leg-inp{font-size:14px;background:var(--bg3);border:none;border-radius:4px;padding:3px 7px;width:100%;color:var(--text1);font-family:var(--ff);}
+.opp-leg-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:3px 6px;width:100%;color:var(--text1);font-family:var(--ff);}
 .opp-leg-inp::placeholder{color:var(--text3);}
 .opp-leg-inp:focus{outline:1px solid var(--gold);}
-.opp-result-tog{text-align:center;font-size:14px;font-weight:700;padding:3px 4px;border-radius:4px;cursor:pointer;user-select:none;}
+.opp-result-tog{text-align:center;font-size:13px;font-weight:700;padding:3px 4px;border-radius:4px;cursor:pointer;user-select:none;}
 .opp-result-tog.W{background:rgba(77,184,112,.2);color:var(--win);}
 .opp-result-tog.L{background:rgba(224,85,80,.15);color:var(--loss);}
 .opp-result-tog.Q{background:var(--bg3);color:var(--text3);border:1px dashed var(--border);}
+.opp-del-btn{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;text-align:center;padding:0;line-height:1;}
+.opp-del-btn:hover{color:var(--loss);}
 .opp-date-sm{font-size:11px;color:var(--text3);white-space:nowrap;text-align:right;}
-.opp-inp{font-size:14px;background:var(--bg3);border:none;border-radius:4px;padding:3px 7px;width:100%;color:var(--text2);font-family:var(--ff);}
+.opp-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:3px 6px;width:100%;color:var(--text2);font-family:var(--ff);}
 .opp-inp::placeholder{color:var(--text3);}
 .opp-inp:focus{outline:1px solid var(--gold);color:var(--text1);}
 
@@ -804,6 +809,7 @@ function changeL(a,s,d){const dk=getDeck(a,s);if(!dk)return;dk.losses=Math.max(0
 function updateDeckField(a,s,field,val){const dk=getDeck(a,s);if(!dk)return;dk[field]=val;saveDeck(a,s,dk);}
 
 /* ════════ MATCH OPS ════════ */
+function deleteMatch(a,s,idx){const dk=getDeck(a,s);if(!dk)return;dk.opponents.splice(idx,1);saveDeck(a,s,dk);render();}
 function mkMatch(){return{id:'m_'+Date.now()+Math.random(),result:'Q',coin:'first',cls:'',btag:'',oppLeg:'',note:'',matchAt:new Date().toISOString()};}
 function addMatch(a,s){const dk=getDeck(a,s);if(!dk)return;dk.opponents.unshift(mkMatch());saveDeck(a,s,dk);render();}
 function updateMatch(a,s,idx,field,val){const dk=getDeck(a,s);if(!dk)return;dk.opponents[idx][field]=val;saveDeck(a,s,dk);}
@@ -837,7 +843,7 @@ function deleteQuestDirect(a,s,type,idx){const q=getQuests(a,s);q[type].splice(i
 /* Progress */
 function startProgEdit(a,s,type,idx){progEditCtx={a,s,type,idx};renderQuests();setTimeout(()=>{const el=document.getElementById(`pe_${a}_${s}_${type}_${idx}`);if(el){el.focus();el.select();}},0);}
 function commitProgEdit(a,s,type,idx,el){const q=getQuests(a,s);const raw=parseInt(el.value);if(!isNaN(raw)){q[type][idx].prog=Math.max(0,Math.min(q[type][idx].target,raw));q[type][idx].done=q[type][idx].prog>=q[type][idx].target;saveQuests(a,s,q);}progEditCtx=null;renderQuests();}
-function progWheel(e,a,s,type,idx){e.preventDefault();const q=getQuests(a,s);const item=q[type][idx];item.prog=Math.max(0,Math.min(item.target,item.prog+(e.deltaY<0?1:-1)));item.done=item.prog>=item.target;saveQuests(a,s,q);renderQuests();}
+function progWheel(e,a,s,type,idx){e.preventDefault();e.stopPropagation();const q=getQuests(a,s);const item=q[type][idx];const step=e.shiftKey?1:50;item.prog=Math.max(0,Math.min(item.target,item.prog+(e.deltaY<0?step:-step)));item.done=item.prog>=item.target;saveQuests(a,s,q);renderQuests();}
 /* Quest drag */
 function qiDS(e,type,idx){dragQiCtx={type,idx};e.dataTransfer.effectAllowed='move';}
 function qiDO(e,type,idx){e.preventDefault();document.querySelectorAll('.qi').forEach(el=>{const[t,i]=el.dataset.qi.split(':');el.classList.toggle('drag-over',t===type&&+i===idx&&idx!==dragQiCtx?.idx);});}
@@ -1104,18 +1110,23 @@ function renderQuests(){
     </div>
   `;
 
-  // Wheel listeners
+  // Wheel listeners — 카드 전체 영역에 붙이기
   setTimeout(()=>{
     ['daily','weekly','event'].forEach(type=>{
       (getQuests(a,s)[type]||[]).forEach((item,idx)=>{
         if(!item||!item.target)return;
-        const el=document.getElementById(`pd_${a}_${s}_${type}_${idx}`);
-        if(el)el.addEventListener('wheel',e=>progWheel(e,a,s,type,idx),{passive:false});
+        // data-qi 속성으로 카드 전체 div 찾기
+        const card=document.querySelector(`.qi[data-qi="${type}:${idx}"]`);
+        if(card)card.addEventListener('wheel',e=>progWheel(e,a,s,type,idx),{passive:false});
       });
     });
-    // XP cur wheel
-    const xpEl=document.getElementById(`xpCur_${a}_${s}`);
-    if(xpEl)xpEl.addEventListener('wheel',e=>xpWheel(e,a,s),{passive:false});
+    // XP 카드 전체 영역 휠
+    const xpWrap=document.getElementById(`xpWrap_${a}_${s}`);
+    if(xpWrap){
+      // 이벤트 카드 전체 — q-event-col의 부모 찾아서 붙이기
+      const evCol=xpWrap.closest('.q-event-col');
+      if(evCol)evCol.addEventListener('wheel',e=>xpWheel(e,a,s),{passive:false});
+    }
   },0);
 }
 
@@ -1142,6 +1153,7 @@ function renderDeck(){
         <input class="opp-leg-inp" type="text" placeholder="상대 전설" value="${(m.oppLeg||'').replace(/"/g,'&quot;')}"
           oninput="updateMatch('${a}','${s}',${i},'oppLeg',this.value)">
         <span class="opp-result-tog ${resCls}" onclick="toggleMatchResult('${a}','${s}',${i})" title="클릭 전환">${resLbl}</span>
+        <button class="opp-del-btn" onclick="deleteMatch('${a}','${s}',${i})" title="매치 삭제">✕</button>
       </div>
       <div class="opp-row-bot">
         <input class="opp-inp" type="text" placeholder="배틀태그" value="${(m.btag||'').replace(/"/g,'&quot;')}"
@@ -1216,8 +1228,8 @@ function renderDeck(){
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
         ${foldBtn}
       </div>
-      <div style="font-size:10px;color:var(--text3);padding:3px 12px 2px;display:grid;grid-template-columns:24px 52px 1fr 36px;gap:6px">
-        <span style="text-align:center">선/후</span><span style="text-align:center">직업</span><span>상대 전설</span><span style="text-align:center">결과</span>
+      <div style="font-size:10px;color:var(--text3);padding:3px 12px 2px;display:grid;grid-template-columns:22px 36px 120px 32px 22px;gap:5px">
+        <span style="text-align:center">선/후</span><span style="text-align:center">직업</span><span>상대 전설</span><span style="text-align:center">결과</span><span></span>
       </div>
       <div class="opp-inner">${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>
     </div>

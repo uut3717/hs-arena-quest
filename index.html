@@ -254,33 +254,36 @@ button{cursor:pointer;}
 .opp-title{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}
 .opp-fold-btn{font-size:11px;color:var(--text3);background:none;border:none;padding:2px 6px;}
 .opp-fold-btn:hover{color:var(--text2);}
-/* Match section wrapper — 덱 score-inner와 동일하게 가운데 400px */
-.opp-inner{max-width:400px;margin:0 auto;}
+/* Match section wrapper */
+.opp-inner{width:100%;}
+/* opp-section 내부 모든 행을 가운데 정렬하는 wrapper */
+.opp-row-wrap{max-width:316px;margin:0 auto;}
 /* Match row: 2줄
-   1줄: 선후(30) | 직업(76=class-sel) | 전설(140=deck-my-legend) | 결과(40) | 삭제(24)
-   2줄: 배틀태그 | 메모 | 날짜
-   → 덱 헤더와 같은 위치에 정렬
+   1줄: 선후(30) | 직업(76) | 전설(140) | 결과(40) | 삭제(24) = 310 + gap*4(6px) = 334px
+   2줄: 배틀태그 | 메모 | 날짜 — 동일 총폭
 */
 .opp-row{display:flex;flex-direction:column;gap:3px;padding:5px 0;border-top:1px solid var(--border);}
-.opp-row:hover{background:var(--bg3);}
+.opp-row:hover{background:rgba(54,48,40,.5);}
 .opp-row-top{display:grid;grid-template-columns:30px 76px 140px 40px 24px;gap:6px;align-items:center;}
-.opp-row-bot{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:center;}
-.opp-coin{text-align:center;cursor:pointer;font-size:13px;font-weight:700;user-select:none;}
+.opp-row-bot{display:grid;grid-template-columns:1fr 1fr 80px;gap:6px;align-items:center;}
+.opp-coin{text-align:center;cursor:pointer;font-size:14px;font-weight:700;user-select:none;}
 .opp-coin.first{color:#4a8fd4;}
 .opp-coin.second{color:#c8963e;}
-.opp-cls-sel{font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:4px 4px;width:100%;text-align:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;font-family:var(--ff);}
+/* 직업: deck class-sel과 동일 스타일 */
+.opp-cls-sel{font-size:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:4px 4px;width:100%;text-align:center;-webkit-appearance:none;-moz-appearance:none;appearance:none;cursor:pointer;font-family:var(--ff);}
 .opp-cls-sel:focus{border-color:var(--gold);outline:none;}
-.opp-leg-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:4px 6px;width:100%;color:var(--text1);font-family:var(--ff);}
+/* 전설: deck-my-legend와 동일 스타일 */
+.opp-leg-inp{font-size:13px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:4px 8px;width:100%;color:var(--text2);font-family:var(--ff);}
 .opp-leg-inp::placeholder{color:var(--text3);}
-.opp-leg-inp:focus{outline:1px solid var(--gold);}
-.opp-result-tog{text-align:center;font-size:13px;font-weight:700;padding:3px 4px;border-radius:4px;cursor:pointer;user-select:none;}
+.opp-leg-inp:focus{border-color:var(--gold);outline:none;color:var(--text1);}
+.opp-result-tog{text-align:center;font-size:14px;font-weight:700;padding:3px 4px;border-radius:4px;cursor:pointer;user-select:none;}
 .opp-result-tog.W{background:rgba(77,184,112,.2);color:var(--win);}
 .opp-result-tog.L{background:rgba(224,85,80,.15);color:var(--loss);}
 .opp-result-tog.Q{background:var(--bg3);color:var(--text3);border:1px dashed var(--border);}
 .opp-del-btn{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;text-align:center;padding:0;line-height:1;}
 .opp-del-btn:hover{color:var(--loss);}
 .opp-date-sm{font-size:11px;color:var(--text3);white-space:nowrap;text-align:right;flex-shrink:0;}
-.opp-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:3px 6px;width:100%;color:var(--text2);font-family:var(--ff);}
+.opp-inp{font-size:13px;background:var(--bg3);border:none;border-radius:4px;padding:4px 6px;width:100%;color:var(--text2);font-family:var(--ff);}
 .opp-inp::placeholder{color:var(--text3);}
 .opp-inp:focus{outline:1px solid var(--gold);color:var(--text1);}
 
@@ -844,7 +847,7 @@ function deleteQuestDirect(a,s,type,idx){const q=getQuests(a,s);q[type].splice(i
 /* Progress */
 function startProgEdit(a,s,type,idx){progEditCtx={a,s,type,idx};renderQuests();setTimeout(()=>{const el=document.getElementById(`pe_${a}_${s}_${type}_${idx}`);if(el){el.focus();el.select();}},0);}
 function commitProgEdit(a,s,type,idx,el){const q=getQuests(a,s);const raw=parseInt(el.value);if(!isNaN(raw)){q[type][idx].prog=Math.max(0,Math.min(q[type][idx].target,raw));q[type][idx].done=q[type][idx].prog>=q[type][idx].target;saveQuests(a,s,q);}progEditCtx=null;renderQuests();}
-function progWheel(e,a,s,type,idx){e.preventDefault();e.stopPropagation();const q=getQuests(a,s);const item=q[type][idx];const step=e.shiftKey?1:50;item.prog=Math.max(0,Math.min(item.target,item.prog+(e.deltaY<0?step:-step)));item.done=item.prog>=item.target;saveQuests(a,s,q);renderQuests();}
+function progWheel(e,a,s,type,idx){e.preventDefault();e.stopPropagation();const q=getQuests(a,s);const item=q[type][idx];const t=item.target;const step=t<=10?1:t<=100?5:50;item.prog=Math.max(0,Math.min(t,item.prog+(e.deltaY<0?step:-step)));item.done=item.prog>=t;saveQuests(a,s,q);renderQuests();}
 /* Quest drag */
 function qiDS(e,type,idx){dragQiCtx={type,idx};e.dataTransfer.effectAllowed='move';}
 function qiDO(e,type,idx){e.preventDefault();document.querySelectorAll('.qi').forEach(el=>{const[t,i]=el.dataset.qi.split(':');el.classList.toggle('drag-over',t===type&&+i===idx&&idx!==dragQiCtx?.idx);});}
@@ -1140,7 +1143,7 @@ function renderDeck(){
     const resCls=m.result==='W'?'W':m.result==='L'?'L':'Q';
     const resLbl=m.result==='W'?'승':m.result==='L'?'패':'?';
     const dt=m.matchAt?new Date(m.matchAt).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
-    return `<div class="opp-row">
+    return `<div class="opp-row-wrap"><div class="opp-row">
       <div class="opp-row-top">
         <span class="opp-coin ${coinCls}" onclick="toggleMatchCoin('${a}','${s}',${i})" title="선/후 전환">${coinLbl}</span>
         <select class="opp-cls-sel" onchange="updateMatch('${a}','${s}',${i},'cls',this.value)">
@@ -1158,7 +1161,7 @@ function renderDeck(){
           oninput="updateMatch('${a}','${s}',${i},'note',this.value)">
         <span class="opp-date-sm">${dt}</span>
       </div>
-    </div>`;
+    </div></div>`;
   }).join('');
   const foldBtn=opps.length>3?`<button class="opp-fold-btn" onclick="foldedOpps=!foldedOpps;renderDeck()">${foldedOpps?`펼치기(${opps.length})`: '접기'}</button>`:'';
   const overlay=isComplete?`<div class="complete-overlay">
@@ -1224,9 +1227,9 @@ function renderDeck(){
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
         ${foldBtn}
       </div>
-      <div style="font-size:10px;color:var(--text3);padding:3px 0 2px;max-width:400px;margin:0 auto;display:grid;grid-template-columns:30px 76px 140px 40px 24px;gap:6px">
+      <div class="opp-row-wrap"><div style="font-size:10px;color:var(--text3);padding:3px 0 2px;display:grid;grid-template-columns:30px 76px 140px 40px 24px;gap:6px">
         <span style="text-align:center">선/후</span><span style="text-align:center">직업</span><span>상대 전설</span><span style="text-align:center">결과</span><span></span>
-      </div>
+      </div></div>
       <div class="opp-inner">${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>
     </div>
   </div>

@@ -174,13 +174,17 @@ button{cursor:pointer;}
 .side-nav.visible{display:flex;}
 
 /* ── SIDE MEMO PANEL (우측 고정) ── */
-.side-memo{position:fixed;top:80px;width:210px;max-height:calc(100vh - 100px);display:flex;flex-direction:column;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);overflow:visible;z-index:50;}
-.side-memo-hdr{padding:8px 12px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-radius:var(--rlg) var(--rlg) 0 0;}
+.side-memo{position:fixed;top:80px;min-width:180px;max-width:420px;max-height:calc(100vh - 100px);display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;z-index:50;resize:horizontal;}
+.side-memo.collapsed{max-height:none;height:auto;resize:none;}
+.side-memo-hdr{padding:8px 12px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;cursor:pointer;user-select:none;}
 .side-memo-hdr-title{font-family:var(--ft);font-size:11px;color:var(--gold);letter-spacing:.08em;}
-.side-memo-body{flex:1;overflow:auto;padding:8px;border-radius:0 0 var(--rlg) var(--rlg);}
-.side-memo-item{margin-bottom:8px;}
-.side-memo-item-title{font-size:11px;color:var(--text3);margin-bottom:3px;font-weight:500;}
-.side-memo-item textarea{min-width:100%;min-height:60px;font-size:13px;resize:both;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 7px;color:var(--text1);display:block;}
+.side-memo-hdr-btns{display:flex;align-items:center;gap:6px;}
+.side-memo-body{flex:1;overflow-y:auto;padding:8px;}
+.side-memo-body.hidden{display:none;}
+.side-memo-item{margin-bottom:6px;position:relative;}
+.side-memo-item-del{position:absolute;top:2px;right:2px;background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:1px 4px;line-height:1;}
+.side-memo-item-del:hover{color:var(--loss);}
+.side-memo-item textarea{width:100%;min-height:55px;font-size:13px;resize:vertical;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 7px 5px 7px;color:var(--text1);display:block;box-sizing:border-box;}
 .side-memo-item textarea:focus{border-color:var(--gold);outline:none;}
 .side-memo-add{width:100%;padding:5px;background:none;border:1px dashed var(--border);border-radius:5px;font-size:11px;color:var(--text3);cursor:pointer;margin-top:2px;}
 .side-memo-add:hover{color:var(--gold);border-color:var(--gold);}
@@ -959,12 +963,12 @@ function setXPField(a,s,field,val){const x=getXP(a,s);x[field]=Math.max(0,parseI
 function startXPEdit(a,s,field){xpEditField={a,s,field};renderQuests();setTimeout(()=>{const el=document.getElementById(`xpe_${a}_${s}_${field}`);if(el){el.focus();el.select();}},0);}
 function commitXPEdit(a,s,field,el){const x=getXP(a,s);const v=parseInt(el.value);if(!isNaN(v))x[field]=Math.max(0,v);saveXP(a,s,x);xpEditField=null;renderQuests();renderNavGrid();}
 function xpEditKey(e,a,s,field,el){
-  if(e.key==='ArrowUp'){e.preventDefault();const v=(parseInt(el.value)||0)+1;el.value=v;}
-  else if(e.key==='ArrowDown'){e.preventDefault();const v=Math.max(0,(parseInt(el.value)||0)-1);el.value=v;}
+  if(e.key==='ArrowUp'){e.preventDefault();const v=(parseInt(el.value)||0)+50;el.value=v;}
+  else if(e.key==='ArrowDown'){e.preventDefault();const v=Math.max(0,(parseInt(el.value)||0)-50);el.value=v;}
   else if(e.key==='Enter')commitXPEdit(a,s,field,el);
   else if(e.key==='Escape'){xpEditField=null;renderQuests();}
 }
-function xpWheel(e,a,s){e.preventDefault();const x=getXP(a,s);const step=e.deltaY<0?50:-50;x.cur=Math.max(0,Math.min(x.max||99999,(x.cur||0)+step));saveXP(a,s,x);renderQuests();renderNavGrid();}
+function xpWheel(e,a,s){e.preventDefault();e.stopPropagation();const x=getXP(a,s);x.cur=Math.max(0,Math.min(x.max||99999,(x.cur||0)+(e.deltaY<0?1:-1)));saveXP(a,s,x);renderQuests();renderNavGrid();}
 
 
 /* ════════ RATING ════════ */
@@ -1048,7 +1052,7 @@ function renderNavGrid(){
       el.addEventListener('wheel',e=>{
         e.preventDefault();
         const v=parseFloat(el.value)||0;
-        const nv=Math.max(0,v+(e.deltaY<0?50:-50));
+        const nv=Math.max(0,v+(e.deltaY<0?1:-1));
         el.value=nv;saveRatingField(a,s,nv);
       },{passive:false});
     }
@@ -1066,8 +1070,8 @@ function renderNavGrid(){
 }
 
 function navRatingKey(e,a,s,el){
-  if(e.key==='ArrowUp'){e.preventDefault();const v=(parseFloat(el.value)||0)+1;el.value=v;saveRatingField(a,s,v);}
-  else if(e.key==='ArrowDown'){e.preventDefault();const v=Math.max(0,(parseFloat(el.value)||0)-1);el.value=v;saveRatingField(a,s,v);}
+  if(e.key==='ArrowUp'){e.preventDefault();const v=(parseFloat(el.value)||0)+50;el.value=v;saveRatingField(a,s,v);}
+  else if(e.key==='ArrowDown'){e.preventDefault();const v=Math.max(0,(parseFloat(el.value)||0)-50);el.value=v;saveRatingField(a,s,v);}
   else if(e.key==='Enter')el.blur();
 }
 
@@ -1571,18 +1575,21 @@ window.addEventListener('load',()=>initGSI());
 
 /* ════════ SIDE MEMO ════════ */
 let mobileMemoCollapsed=true;
+let sideMemoCollapsed=false;
+
+function deleteMemoFromPanel(idx){
+  const m=getMemos();m.splice(idx,1);saveMemos(m);renderSideMemo();
+}
 
 function positionSideMemo(){
   const memo=document.getElementById('sideMemoPanel');
   if(!memo)return;
-  const contentW=800;
+  const curW=memo.offsetWidth||210;
   const vw=window.innerWidth;
   const gap=16;
-  const panelW=210;
-  const sideSpace=(vw-contentW)/2;
-  if(sideSpace>panelW+gap*2){
-    // 메모: 우측
-    memo.style.right=Math.max(gap, sideSpace-panelW-gap)+'px';
+  const sideSpace=(vw-800)/2;
+  if(sideSpace>curW+gap){
+    memo.style.right=Math.max(gap,Math.min(sideSpace-curW-gap,gap))+'px';
     memo.style.display='flex';
   } else {
     memo.style.display='none';
@@ -1596,47 +1603,43 @@ function renderSideMemo(){
   if(!sp){
     sp=document.createElement('div');
     sp.id='sideMemoPanel';
-    sp.className='side-memo';
     document.body.appendChild(sp);
   }
+  sp.className='side-memo'+(sideMemoCollapsed?' collapsed':'');
   sp.innerHTML=`
-    <div class="side-memo-hdr">
+    <div class="side-memo-hdr" onclick="sideMemoCollapsed=!sideMemoCollapsed;renderSideMemo()">
       <span class="side-memo-hdr-title">📝 MEMO</span>
-      <button onclick="addMemoCard()" style="background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer" title="메모 추가">＋</button>
+      <div class="side-memo-hdr-btns" onclick="event.stopPropagation()">
+        <button onclick="addMemoCard()" style="background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:0 2px" title="메모 추가">＋</button>
+        <span style="font-size:11px;color:var(--text3);padding:0 2px">${sideMemoCollapsed?'▼':'▲'}</span>
+      </div>
     </div>
-    <div class="side-memo-body">
+    <div class="side-memo-body${sideMemoCollapsed?' hidden':''}">
       ${memos.map((m,i)=>`
         <div class="side-memo-item">
-          <div class="side-memo-item-title">${(m.title||'메모').replace(/</g,'&lt;')}</div>
-          <textarea data-memo-idx="${i}"
-            placeholder="내용...">${m.body||''}</textarea>
+          <button class="side-memo-item-del" onclick="deleteMemoFromPanel(${i})" title="삭제">✕</button>
+          <textarea data-memo-idx="${i}" placeholder="메모...">${m.body||''}</textarea>
         </div>`).join('')}
-      <button class="side-memo-add" onclick="addMemoCard()">+ 메모 추가</button>
+      <button class="side-memo-add" onclick="addMemoCard()">+ 추가</button>
     </div>`;
-  // IME 안전 이벤트: compositionend + blur 로 저장 (oninput X)
+  // IME 안전 저장
   sp.querySelectorAll('textarea[data-memo-idx]').forEach(el=>{
     let composing=false;
     el.addEventListener('compositionstart',()=>composing=true);
     el.addEventListener('compositionend',()=>{composing=false;updateMemoField(+el.dataset.memoIdx,'body',el.value);});
     el.addEventListener('input',()=>{if(!composing)updateMemoField(+el.dataset.memoIdx,'body',el.value);});
   });
-  positionSideMemo();
-  // 패널 휠 → 페이지 스크롤 방지, 패널 내부만 스크롤
-  sp.addEventListener('wheel',e=>{
-    e.stopPropagation();
-    e.preventDefault();
+  // 패널 휠 → 내부만 스크롤
+  sp.onwheel=e=>{
+    e.preventDefault();e.stopPropagation();
     const body=sp.querySelector('.side-memo-body');
     if(body)body.scrollTop+=e.deltaY;
-  },{passive:false});
+  };
+  positionSideMemo();
 
-  // Mobile bottom panel
+  // Mobile
   let mp=document.getElementById('mobileMemoPanel');
-  if(!mp){
-    mp=document.createElement('div');
-    mp.id='mobileMemoPanel';
-    mp.className='mobile-memo'+(mobileMemoCollapsed?' collapsed':'');
-    document.body.appendChild(mp);
-  }
+  if(!mp){mp=document.createElement('div');mp.id='mobileMemoPanel';document.body.appendChild(mp);}
   mp.className='mobile-memo'+(mobileMemoCollapsed?' collapsed':'');
   mp.innerHTML=`
     <div class="mobile-memo-tab" onclick="mobileMemoCollapsed=!mobileMemoCollapsed;renderSideMemo()">
@@ -1645,12 +1648,11 @@ function renderSideMemo(){
     </div>
     <div class="mobile-memo-body">
       ${memos.map((m,i)=>`
-        <div class="mobile-memo-item">
-          <div class="mobile-memo-item-title">${(m.title||'메모').replace(/</g,'&lt;')}</div>
-          <textarea rows="3" data-memo-idx="${i}"
-            placeholder="내용...">${m.body||''}</textarea>
+        <div class="mobile-memo-item" style="position:relative">
+          <button class="side-memo-item-del" onclick="deleteMemoFromPanel(${i})" style="position:absolute;top:2px;right:2px">✕</button>
+          <textarea rows="3" data-memo-idx="${i}" placeholder="메모...">${m.body||''}</textarea>
         </div>`).join('')}
-      <button class="side-memo-add" onclick="addMemoCard()">+ 메모 추가</button>
+      <button class="side-memo-add" onclick="addMemoCard()">+ 추가</button>
     </div>`;
   mp.querySelectorAll('textarea[data-memo-idx]').forEach(el=>{
     let composing=false;

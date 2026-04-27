@@ -248,10 +248,9 @@ button{cursor:pointer;}
 .sc-val.lv{color:var(--loss);}
 .score-sep{font-family:var(--ft);font-size:20px;color:var(--text3);}
 /* Deck note */
-.deck-note-wrap{padding:0 15px 8px;display:flex;justify-content:center;}
-.deck-note{width:100%;max-width:400px;min-height:32px;max-height:72px;color:var(--text2);font-size:13px;}
+.deck-note{width:100%;min-height:52px;color:var(--text2);font-size:13px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;resize:vertical;}
 .deck-note::placeholder{color:var(--text3);}
-.deck-note:focus{color:var(--text1);}
+.deck-note:focus{color:var(--text1);border-color:var(--gold);outline:none;}
 /* Match */
 .opp-section{border-top:1px solid var(--border);}
 .opp-hdr{padding:8px 15px;display:flex;align-items:center;justify-content:space-between;}
@@ -629,6 +628,11 @@ function initGSI(){
       render();
       showApp();
       setSyncStatus('ok','Drive 연동됨');
+      // 55분마다 silent 토큰 갱신
+      clearInterval(window._tokenRefreshTimer);
+      window._tokenRefreshTimer=setInterval(()=>{
+        if(gToken&&tokenClient)tokenClient.requestAccessToken({prompt:''});
+      },55*60*1000);
     }
   });
   // 새로고침 시 silent 토큰 발급 시도 (팝업 없음)
@@ -907,10 +911,9 @@ function focusKoreanInput(el){
   setTimeout(()=>{el.focus();el.select();},80);
 }
 function addQuestItem(a,s,type){
-  // 미리 저장하지 않고, 팝업에서 확인 시에만 추가
-  qeCtx={a,s,type,idx:-1}; // idx=-1 = 새 항목
+  qeCtx={a,s,type,idx:-1};
   document.getElementById('qe_text').value='';
-  document.getElementById('qe_target').value=0;
+  document.getElementById('qe_target').value=3; // 기본값 3
   showPopup('questEditPopup');
   setTimeout(()=>{const el=document.getElementById('qe_text');el.select();focusKoreanInput(el);},50);
 }
@@ -1321,10 +1324,6 @@ function renderDeck(){
         </div>
       </div>
     </div>
-    <div class="deck-note-wrap">
-      <textarea class="deck-note" placeholder="덱 메모 (키카드, 전략, 드래프트 코멘트...)"
-        oninput="updateDeckField('${a}','${s}','note',this.value)">${dk.note||''}</textarea>
-    </div>
     <div class="opp-section">
       <div class="opp-hdr">
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
@@ -1339,6 +1338,10 @@ function renderDeck(){
   <div style="display:flex;gap:6px;margin-top:6px">
     <button class="btn sm gold" style="flex:1" onclick="addMatch('${a}','${s}')">+ 매치 추가</button>
     <button class="btn sm red" onclick="if(confirm('현재 덱을 삭제할까요? 기록에 남지 않습니다.')){sd(K('${a}','${s}','deck'),null);render()}">덱 삭제</button>
+  </div>
+  <div style="margin-top:6px">
+    <textarea class="deck-note" placeholder="덱 메모 (키카드, 전략, 드래프트 코멘트...)"
+      oninput="updateDeckField('${a}','${s}','note',this.value)">${dk.note||''}</textarea>
   </div>`;
   setTimeout(()=>{
     const wv=document.getElementById(`scW_${a}_${s}`);const lv=document.getElementById(`scL_${a}_${s}`);
@@ -1607,11 +1610,11 @@ function renderSideMemo(){
   }
   sp.className='side-memo'+(sideMemoCollapsed?' collapsed':'');
   sp.innerHTML=`
-    <div class="side-memo-hdr" onclick="sideMemoCollapsed=!sideMemoCollapsed;renderSideMemo()">
+    <div class="side-memo-hdr" onclick="sideMemoCollapsed=!sideMemoCollapsed;renderSideMemo()" title="${sideMemoCollapsed?'펼치기':'접기'}">
       <span class="side-memo-hdr-title">📝 MEMO</span>
-      <div class="side-memo-hdr-btns" onclick="event.stopPropagation()">
-        <button onclick="addMemoCard()" style="background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:0 2px" title="메모 추가">＋</button>
-        <span style="font-size:11px;color:var(--text3);padding:0 2px">${sideMemoCollapsed?'▼':'▲'}</span>
+      <div class="side-memo-hdr-btns">
+        <button onclick="event.stopPropagation();addMemoCard()" style="background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:0 4px;line-height:1" title="메모 추가">＋</button>
+        <span style="font-size:12px;color:var(--text3);pointer-events:none">${sideMemoCollapsed?'▼':'▲'}</span>
       </div>
     </div>
     <div class="side-memo-body${sideMemoCollapsed?' hidden':''}">

@@ -301,16 +301,6 @@ button{cursor:pointer;}
 .no-deck{background:var(--bg2);border:1px dashed var(--border);border-radius:var(--rlg);padding:28px 14px;text-align:center;color:var(--text3);margin-bottom:8px;}
 .no-deck p{margin-bottom:11px;font-size:14px;}
 
-/* ── RATING PAGE ── */
-.rating-chart-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);padding:16px;margin-bottom:12px;}
-canvas#ratingCanvas{width:100%;height:200px;display:block;}
-.rating-log{display:flex;flex-direction:column;gap:4px;max-height:320px;overflow-y:auto;}
-.rl-item{display:flex;align-items:center;gap:9px;padding:6px 11px;background:var(--bg3);border-radius:var(--r);font-size:13px;}
-.rl-date{color:var(--text3);font-size:11px;white-space:nowrap;}
-.rl-val{font-family:var(--ft);font-size:15px;color:var(--gold);}
-.rl-del{background:none;border:none;color:var(--text3);font-size:12px;margin-left:auto;}
-.rl-del:hover{color:var(--loss);}
-
 /* ── HISTORY ── */
 .filter-row{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:7px;}
 .filter-lbl{font-size:12px;color:var(--text3);white-space:nowrap;}
@@ -405,7 +395,6 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
     <button class="btn sm" id="authBtn" onclick="handleAuth()" style="display:none">로그아웃</button>
     <div class="hdr-btns">
       <button class="btn sm nav-active" id="nav-main" onclick="showPage('main')">덱/퀘스트</button>
-      <button class="btn sm" id="nav-rating" onclick="showPage('rating')">📈 평점</button>
       <button class="btn sm" id="nav-records" onclick="showPage('records')">📜 전체기록</button>
     </div>
   </div>
@@ -430,33 +419,10 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
   </div>
 </div>
 
-<!-- ═══ RATING PAGE ═══ -->
-<div id="pageRating" class="page">
-  <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
-    <span class="filter-lbl">계정:</span>
-    <button id="rta-T" class="tog on t" onclick="toggleRF('acc','T')">T</button>
-    <button id="rta-H" class="tog on h" onclick="toggleRF('acc','H')">H</button>
-    <span class="filter-lbl" style="margin-left:6px">서버:</span>
-    <button id="rts-NA" class="tog on" onclick="toggleRF('srv','NA')">NA</button>
-    <button id="rts-EU" class="tog on" onclick="toggleRF('srv','EU')">EU</button>
-    <button id="rts-ASIA" class="tog on" onclick="toggleRF('srv','ASIA')">ASIA</button>
-  </div>
-  <div class="rating-chart-box">
-    <div style="font-family:var(--ft);font-size:12px;color:var(--gold);letter-spacing:.06em;margin-bottom:10px" id="rcTitle">평점 추이</div>
-    <canvas id="ratingCanvas"></canvas>
-  </div>
-  <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
-    <input type="number" id="ratingInput" placeholder="평점" style="width:100px" onkeydown="if(event.key==='Enter')addRatingEntry()">
-    <select id="ratingAcc" style="width:60px"><option value="T">T</option><option value="H">H</option></select>
-    <select id="ratingSrv" style="width:78px"><option value="NA">NA</option><option value="EU">EU</option><option value="ASIA">ASIA</option></select>
-    <button class="btn gold sm" onclick="addRatingEntry()">+ 기록</button>
-  </div>
-  <div class="rating-log" id="ratingLog"></div>
-</div>
-
 <!-- ═══ RECORDS ═══ -->
 <div id="pageRecords" class="page">
   <div id="histControls"></div>
+  <div id="archiveArea"></div>
   <div class="stats-grid" id="statsGrid"></div>
   <div class="hist-table-wrap" id="histTableWrap"></div>
 </div>
@@ -510,12 +476,8 @@ canvas#ratingCanvas{width:100%;height:200px;display:block;}
       <span style="font-size:13px;color:var(--text2)">★ 관중 호응 당첨 (1000골드)</span>
     </div>
     <div style="border-top:1px solid var(--border);margin:10px 0;padding-top:10px">
-      <div style="font-size:12px;color:var(--text2);margin-bottom:7px">📈 평점 변동 (기록에 자동 추가)</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div class="pf" style="flex:1;margin:0"><label style="font-size:11px">덱 시작 전 평점</label><input type="number" id="rw_rating_before" placeholder="—"></div>
-        <div style="color:var(--text3);padding-top:18px">→</div>
-        <div class="pf" style="flex:1;margin:0"><label style="font-size:11px">덱 완료 후 평점</label><input type="number" id="rw_rating_after" placeholder="—"></div>
-      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:7px">📈 완료 후 평점</div>
+      <div class="pf" style="margin:0"><input type="number" id="rw_rating_after" placeholder="—"></div>
     </div>
     <div class="pbtn-row">
       <button class="btn sm" onclick="closePopup('rewardPopup')">나중에</button>
@@ -815,7 +777,6 @@ const CLS_S={'전사':'전사','성기사':'기사','사냥꾼':'냥꾼','도적
 let curAcc='T',curSrv='NA',curPage='main';
 let qeCtx=null,mdCtx=null,hdIdx=null,rwCtx=null;
 let audienceCbChecked=false,foldedOpps=false,dragQiCtx=null,progEditCtx=null,xpEditField=null;
-let ratingFilter={acc:{T:true,H:true},srv:{NA:true,EU:true,ASIA:true}};
 let histFilter={acc:{T:true,H:true},srv:{NA:true,EU:true,ASIA:true},cls:null,dateFrom:'',dateTo:''};
 let memoDragSrc=null;
 
@@ -832,14 +793,17 @@ const getQuests=(a,s)=>gd(K(a,s,'quests'),defaultQuests());
 const saveQuests=(a,s,q)=>sd(K(a,s,'quests'),q);
 const getHistory=()=>gd(GK('history'),[]);
 const saveHistory=h=>sd(GK('history'),h);
-const getRatings=()=>gd(GK('ratings'),[]);
-const saveRatings=r=>sd(GK('ratings'),r);
 const getMemos=()=>gd(GK('memos'),[{id:'m1',title:'메모 1',body:''}]);
 const saveMemos=m=>sd(GK('memos'),m);
 const getXP=(a,s)=>gd(K(a,s,'xp'),{cur:0,max:4000});
 const saveXP=(a,s,x)=>sd(K(a,s,'xp'),x);
 const getEvCol=(a,s)=>gd(K(a,s,'evcol'),false);
 const saveEvCol=(a,s,v)=>sd(K(a,s,'evcol'),v);
+const getSeasons=()=>gd('hs4_g_seasons',[]);
+const saveSeasons=v=>sd('hs4_g_seasons',v);
+
+/* 이중직업 시즌: true이면 덱에 영능 칸 표시 */
+const DUAL_CLASS_SEASON=true;
 
 function defaultQuests(){
   return {
@@ -850,7 +814,7 @@ function defaultQuests(){
 }
 
 /* ════════ DECK OPS ════════ */
-function newDeck(a,s,cls){return{id:'dk_'+Date.now(),acc:a,srv:s,cls:cls||CLS_ORDER[0],myLeg:'',wins:0,losses:0,opponents:[],note:'',createdAt:new Date().toISOString(),reward:null};}
+function newDeck(a,s,cls){return{id:'dk_'+Date.now(),acc:a,srv:s,cls:cls||CLS_ORDER[0],heroPower:'',myLeg:'',wins:0,losses:0,opponents:[],note:'',createdAt:new Date().toISOString(),reward:null};}
 function addNewDeck(){
   const a=curAcc,s=curSrv;const ex=getDeck(a,s);
   if(ex){if(!confirm(`${a}-${s} 진행중인 덱이 있습니다. 새 덱을 시작하면 현재 덱이 기록에 저장됩니다.`))return;finalizeDeck(a,s,'abandon');}
@@ -863,12 +827,11 @@ function finalizeDeck(a,s,reason,reward){
 }
 function promptReward(a,s){
   rwCtx={a,s};
-  ['rw_gold','rw_pack','rw_ticket','rw_etc','rw_rating_before','rw_rating_after'].forEach(id=>document.getElementById(id).value='');
+  ['rw_gold','rw_pack','rw_ticket','rw_etc','rw_rating_after'].forEach(id=>document.getElementById(id).value='');
   const m=getMeta(a,s);
   const rating=m.rating||'';
   if(rating){
-    document.getElementById('rw_rating_before').value=rating;
-    document.getElementById('rw_rating_after').value=rating;  // 완료 후도 기본값으로 채움
+    document.getElementById('rw_rating_after').value=rating;
   }
   audienceCbChecked=false;updateAudienceCb();
   showPopup('rewardPopup');
@@ -883,7 +846,6 @@ function promptReward(a,s){
     attachWheel('rw_gold',5);
     attachWheel('rw_pack',1);
     attachWheel('rw_ticket',1);
-    attachWheel('rw_rating_before',1);
     attachWheel('rw_rating_after',1);
   },50);
 }
@@ -900,14 +862,9 @@ function saveReward(){
     ticket:parseInt(document.getElementById('rw_ticket').value)||0,
     audienceBonus:audienceCbChecked,
     etc:document.getElementById('rw_etc').value.trim()};
-  // Save rating change
-  const rb=parseFloat(document.getElementById('rw_rating_before').value);
+  // Save rating
   const ra=parseFloat(document.getElementById('rw_rating_after').value);
   if(!isNaN(ra)){
-    const ratings=getRatings();
-    if(!isNaN(rb))ratings.push({val:rb,acc:a,srv:s,at:new Date(Date.now()-1000).toISOString(),label:'덱 시작 전'});
-    ratings.push({val:ra,acc:a,srv:s,at:new Date().toISOString(),label:'덱 완료 후'});
-    saveRatings(ratings);
     const m=getMeta(a,s);m.rating=ra;saveMeta(a,s,m);
   }
   closePopup('rewardPopup');finalizeDeck(a,s,'complete',reward);rwCtx=null;render();
@@ -999,10 +956,7 @@ function xpWheel(e,a,s){e.preventDefault();e.stopPropagation();const x=getXP(a,s
 
 
 /* ════════ RATING ════════ */
-function saveRatingField(a,s,val){const m=getMeta(a,s);const p=parseFloat(val);if(!isNaN(p)){m.rating=p;saveMeta(a,s,m);const r=getRatings();r.push({val:p,acc:a,srv:s,at:new Date().toISOString()});saveRatings(r);}}
-function addRatingEntry(){const val=parseFloat(document.getElementById('ratingInput').value);if(!val)return;const a=document.getElementById('ratingAcc').value;const s=document.getElementById('ratingSrv').value;const r=getRatings();r.push({val,acc:a,srv:s,at:new Date().toISOString()});saveRatings(r);const m=getMeta(a,s);m.rating=val;saveMeta(a,s,m);document.getElementById('ratingInput').value='';renderRatingPage();renderNavGrid();}
-function deleteRatingEntry(ri){const r=getRatings();r.splice(ri,1);saveRatings(r);renderRatingPage();}
-function toggleRF(type,val){ratingFilter[type][val]=!ratingFilter[type][val];const el=document.getElementById(type==='acc'?`rta-${val}`:`rts-${val}`);if(el){el.classList.toggle('on',ratingFilter[type][val]);if(type==='acc'){el.classList.toggle(val==='T'?'t':'h',ratingFilter[type][val]);}}renderRatingPage();}
+function saveRatingField(a,s,val){const m=getMeta(a,s);const p=parseFloat(val);if(!isNaN(p)){m.rating=p;saveMeta(a,s,m);}}
 
 /* ════════ MEMO ════════ */
 function addMemoCard(){const m=getMemos();m.push({id:'m_'+Date.now(),title:'메모 '+(m.length+1),body:''});saveMemos(m);renderMemoPage();renderSideMemo();}
@@ -1265,6 +1219,7 @@ function renderDeck(){
   if(!dk){area.innerHTML=`<div class="no-deck"><p>${a}-${s} 서버에 진행 중인 아레나 덱이 없습니다</p><button class="btn gold" onclick="addNewDeck()">+ 새 덱 시작</button></div>`;return;}
   const isComplete=dk.wins>=MAX_W||dk.losses>=MAX_L;
   const clsOpts=CLS_ORDER.map(c=>`<option value="${c}"${c===dk.cls?' selected':''}>${CLS_S[c]||c}</option>`).join('');
+  const hpOpts=CLS_ORDER.map(c=>`<option value="${c}"${c===dk.heroPower?' selected':''}>${CLS_S[c]||c}</option>`).join('');
   const opps=dk.opponents;
   const showN=foldedOpps?Math.min(3,opps.length):opps.length;
   const oppHtml=opps.slice(0,showN).map((m,i)=>{
@@ -1325,6 +1280,7 @@ function renderDeck(){
       <div class="score-inner">
         <div class="score-cls-row">
           <select class="class-sel" onchange="updateDeckField('${a}','${s}','cls',this.value)">${clsOpts}</select>
+          ${DUAL_CLASS_SEASON?`<select class="class-sel" title="영웅 능력" onchange="updateDeckField('${a}','${s}','heroPower',this.value)"><option value="">영능—</option>${hpOpts}</select>`:''}
           <input class="deck-my-legend" type="text" placeholder="내 전설 카드" value="${(dk.myLeg||'').replace(/"/g,'&quot;')}"
             oninput="updateDeckField('${a}','${s}','myLeg',this.value)">
           <div class="score-count">
@@ -1374,73 +1330,65 @@ function renderDeck(){
   },0);
 }
 
-/* ════════ RENDER: RATING PAGE ════════ */
-function renderRatingPage(){
-  const active=getRatings().filter(r=>ratingFilter.acc[r.acc]&&ratingFilter.srv[r.srv]);
-  document.getElementById('rcTitle').textContent=`평점 추이 — ${ACCOUNTS.filter(a=>ratingFilter.acc[a]).join('+')} / ${SERVERS.filter(s=>ratingFilter.srv[s]).join('+')}`;
-  drawRatingChart(active);
-  const all=getRatings();
-  document.getElementById('ratingLog').innerHTML=active.slice().reverse().map(r=>{
-    const ri=all.indexOf(r);const dt=new Date(r.at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    return `<div class="rl-item">
-      <span class="rl-date">${dt}</span>
-      <span class="rl-val">${r.val}</span>
-      <span style="font-size:12px;color:${r.acc==='T'?'var(--t-acc)':'var(--h-acc)'}">${r.acc} ${r.srv}</span>
-      ${r.label?`<span style="font-size:11px;color:var(--text3)">${r.label}</span>`:''}
-      <button class="rl-del" onclick="deleteRatingEntry(${ri})">✕</button>
-    </div>`;
-  }).join('')||`<div style="text-align:center;color:var(--text3);padding:20px">기록 없음</div>`;
+/* ════════ SEASON ARCHIVE ════════ */
+function archiveCurrentSeason(label){
+  const hist=getHistory();
+  if(!hist.length){alert('현재 기록이 없습니다.');return;}
+  const name=label||`시즌 ${getSeasons().length+1}`;
+  // 현재 평점 스냅샷
+  const ratings={};
+  ACCOUNTS.forEach(a=>SERVERS.forEach(s=>{const m=getMeta(a,s);if(m.rating)ratings[`${a}_${s}`]=m.rating;}));
+  const season={id:'s_'+Date.now(),name,history:[...hist],ratings,archivedAt:new Date().toISOString()};
+  const seasons=getSeasons();seasons.unshift(season);saveSeasons(seasons);
+  // 현재 히스토리 비우기
+  saveHistory([]);
+  renderRecords();
 }
-function drawRatingChart(log){
-  const canvas=document.getElementById('ratingCanvas');if(!canvas)return;
-  const dpr=window.devicePixelRatio||1;const W=Math.max(300,canvas.parentElement.clientWidth-32);const H=200;
-  canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';
-  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
-  if(!log.length){ctx.fillStyle='rgba(106,90,72,.5)';ctx.font='13px Noto Sans KR';ctx.textAlign='center';ctx.fillText('평점을 기록하면 표시됩니다',W/2,H/2);return;}
-  // Group by acc+srv
-  const groups={};
-  ACCOUNTS.forEach(a=>SERVERS.forEach(s=>{
-    const key=`${a}_${s}`;const pts=log.filter(r=>r.acc===a&&r.srv===s).sort((x,y)=>x.at.localeCompare(y.at));
-    if(pts.length)groups[key]={acc:a,srv:s,pts};
-  }));
-  const colors={'T_NA':'#4a8fd4','T_EU':'#7ab4e8','T_ASIA':'#a8d0f0','H_NA':'#c8963e','H_EU':'#e0b870','H_ASIA':'#f0d090'};
-  const allVals=log.map(r=>r.val);const mn=Math.min(...allVals),mx=Math.max(...allVals);
-  const pad=38,padB=44,padT=12;const gW=W-pad*2,gH=H-padB-padT;
-  // X axis: global time range
-  const allTimes=log.map(r=>new Date(r.at).getTime());
-  const tMin=Math.min(...allTimes),tMax=Math.max(...allTimes);
-  const tRange=tMax-tMin||1;
-  const toX=t=>pad+(t-tMin)/tRange*gW;
-  const toY=v=>padT+gH-(mx===mn?gH/2:((v-mn)/(mx-mn))*gH);
-  // Grid lines
-  ctx.strokeStyle='rgba(74,64,53,.4)';ctx.lineWidth=.7;
-  [0,.25,.5,.75,1].forEach(t=>{const y=padT+gH*(1-t);ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();
-    ctx.fillStyle='rgba(160,152,120,.7)';ctx.font='10px sans-serif';ctx.textAlign='right';ctx.fillText(Math.round(mn+t*(mx-mn)),pad-3,y+3);});
-  // Draw each group
-  Object.entries(groups).forEach(([key,{acc,srv,pts}])=>{
-    const color=colors[key]||'#aaa';
-    ctx.beginPath();ctx.moveTo(toX(new Date(pts[0].at).getTime()),toY(pts[0].val));
-    for(let i=1;i<pts.length;i++)ctx.lineTo(toX(new Date(pts[i].at).getTime()),toY(pts[i].val));
-    ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
-    pts.forEach(r=>{ctx.beginPath();ctx.arc(toX(new Date(r.at).getTime()),toY(r.val),3.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();});
-    // Label at last point
-    if(pts.length){const last=pts[pts.length-1];const lx=toX(new Date(last.at).getTime());const ly=toY(last.val);
-      ctx.fillStyle=color;ctx.font='bold 10px sans-serif';ctx.textAlign=lx>W-pad-30?'right':'left';
-      ctx.fillText(`${acc}-${srv}`,lx+(lx>W-pad-30?-5:5),ly-5);}
-  });
-  // X axis date labels
-  const dateKeys=[...new Set(log.map(r=>r.at.slice(0,10)))].sort();
-  const showDates=dateKeys.length<=6?dateKeys:dateKeys.filter((_,i)=>i===0||i===dateKeys.length-1||i%Math.ceil(dateKeys.length/5)===0);
-  showDates.forEach(d=>{const pts2=log.filter(r=>r.at.startsWith(d));if(!pts2.length)return;
-    const tx=toX(new Date(pts2[0].at).getTime());
-    ctx.fillStyle='rgba(106,90,72,.8)';ctx.font='10px sans-serif';ctx.textAlign='center';
-    ctx.fillText(`${parseInt(d.slice(5,7))}/${parseInt(d.slice(8,10))}`,tx,H-padB+14);});
-  // Legend at bottom
-  const keys=Object.keys(groups);const legendY=H-12;let lx=pad;
-  keys.forEach(key=>{const{acc,srv}=groups[key];const color=colors[key];
-    ctx.fillStyle=color;ctx.fillRect(lx,legendY-8,10,8);
-    ctx.fillStyle='rgba(160,152,120,.9)';ctx.font='10px sans-serif';ctx.textAlign='left';
-    ctx.fillText(`${acc}-${srv}`,lx+13,legendY);lx+=58;});
+function deleteArchivedSeason(idx){
+  if(!confirm('아카이브된 시즌을 삭제할까요?'))return;
+  const seasons=getSeasons();seasons.splice(idx,1);saveSeasons(seasons);renderRecords();
+}
+function renameArchivedSeason(idx,el){
+  const seasons=getSeasons();seasons[idx].name=el.value;saveSeasons(seasons);
+}
+let expandedSeasons={};
+
+function renderSeasonArchive(){
+  const seasons=getSeasons();
+  if(!seasons.length)return '';
+  const items=seasons.map((s,i)=>{
+    const n=s.history.length;const tw=s.history.reduce((sum,h)=>sum+h.wins,0);
+    const tg=s.history.reduce((sum,h)=>sum+(h.wins+h.losses),0);
+    const avgW=n?(tw/n).toFixed(2):'—';const wPct=tg?Math.round(tw/tg*100):0;
+    const d12=s.history.filter(h=>h.wins>=12).length;
+    const exp=expandedSeasons[s.id];
+    // 평점 스냅샷
+    const ratStr=Object.entries(s.ratings||{}).map(([k,v])=>`${k.replace('_','-')}:${v}`).join(' / ');
+    const rows=exp?s.history.map((h,hi)=>{
+      const sc=h.wins>=12?'g':h.wins>=7?'gr':'r';
+      const cd=h.completedAt?new Date(h.completedAt).toLocaleDateString('ko-KR'):'';
+      return `<tr>
+        <td><span class="hs ${sc}">${h.wins}승 ${h.losses}패</span></td>
+        <td><span class="acc-badge ${h.acc}">${h.acc}</span> <span style="font-size:11px;color:var(--text3)">${h.srv}</span></td>
+        <td style="color:var(--text2)">${CLS_S[h.cls]||h.cls||'—'}${h.heroPower?' / '+(CLS_S[h.heroPower]||h.heroPower):''}</td>
+        <td style="font-size:11px;color:var(--text3)">${cd}</td>
+      </tr>`;
+    }).join(''):'';
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:8px;">
+      <div style="padding:9px 14px;background:var(--bg3);border-bottom:1px solid ${exp?'var(--border)':'transparent'};display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <button onclick="expandedSeasons['${s.id}']=!expandedSeasons['${s.id}'];renderRecords()" style="background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;padding:0 4px">${exp?'▼':'▶'}</button>
+        <input value="${s.name}" onchange="renameArchivedSeason(${i},this)" style="background:none;border:none;border-bottom:1px solid var(--border);color:var(--gold);font-family:var(--ft);font-size:13px;letter-spacing:.05em;padding:1px 4px;width:160px;">
+        <span style="font-size:12px;color:var(--text3)">${n}덱 · 평균${avgW}승 · ${wPct}% · 12승${d12}회</span>
+        ${ratStr?`<span style="font-size:11px;color:var(--text2);margin-left:4px">📈 ${ratStr}</span>`:''}
+        <button class="btn xs red" style="margin-left:auto" onclick="deleteArchivedSeason(${i})">삭제</button>
+      </div>
+      ${exp?`<div style="padding:8px 12px;overflow-x:auto"><table class="hist-table" style="min-width:320px"><thead><tr><th>결과</th><th>계정/서버</th><th>클래스</th><th>날짜</th></tr></thead><tbody>${rows}</tbody></table></div>`:''}
+    </div>`;
+  }).join('');
+  return `<div style="margin-bottom:16px">
+    <div style="font-family:var(--ft);font-size:12px;color:var(--gold);letter-spacing:.06em;margin-bottom:8px;">📦 시즌 아카이브</div>
+    ${items}
+  </div>`;
 }
 
 /* ════════ RENDER: RECORDS ════════ */
@@ -1461,8 +1409,10 @@ function renderRecords(){
         <input type="date" value="${histFilter.dateTo}" onchange="histFilter.dateTo=this.value;renderRecords()" style="width:130px;font-size:12px">
         <button class="btn sm" onclick="resetHF()">초기화</button>
         <span style="font-size:11px;color:var(--text3)">시즌: 2026-03-11~ / 패치: 2026-04-01~</span>
+        <button class="btn sm gold" style="margin-left:auto" onclick="promptArchiveSeason()">📦 시즌 마감</button>
       </div>
     </div>`;
+  document.getElementById('archiveArea').innerHTML=renderSeasonArchive();
   const filtered=hist.filter(h=>{
     if(!histFilter.acc[h.acc])return false;if(!histFilter.srv[h.srv])return false;
     if(histFilter.cls&&h.cls!==histFilter.cls)return false;
@@ -1503,7 +1453,7 @@ function renderRecords(){
     return `<tr style="cursor:pointer" ondblclick="openHistDetail(${vi})">
       <td><span class="hs ${sc}">${resultStr}</span></td>
       <td><span class="acc-badge ${h.acc}">${h.acc}</span> <span style="font-size:11px;color:var(--text3)">${h.srv}</span></td>
-      <td style="color:var(--text2)">${CLS_S[h.cls]||h.cls||'—'}</td>
+      <td style="color:var(--text2)">${CLS_S[h.cls]||h.cls||'—'}${h.heroPower?`<span style="font-size:11px;color:var(--text3)"> / ${CLS_S[h.heroPower]||h.heroPower}</span>`:''}</td>
       <td style="color:var(--text2);font-size:12px">${h.myLeg||'—'}</td>
       <td style="font-size:12px;color:var(--text2)">${rewStr}</td>
       <td style="font-size:13px;font-family:var(--ft);color:${sc2};white-space:nowrap">${rew?settleStr:'—'}</td>
@@ -1514,6 +1464,12 @@ function renderRecords(){
   document.getElementById('histTableWrap').innerHTML=`
     <table class="hist-table"><thead><tr><th>결과</th><th>계정/서버</th><th>클래스</th><th>내 전설</th><th>보상</th><th>정산</th><th>날짜</th><th></th></tr></thead><tbody>${rows}</tbody></table>
     <div style="font-size:11px;color:var(--text3);padding:6px 10px">더블클릭으로 상세 보기 · 정산 = 보상 − 입장료 300골드</div>`;
+}
+function promptArchiveSeason(){
+  const def=`시즌 ${getSeasons().length+1}`;
+  const name=prompt('이 시즌의 이름을 입력하세요\n(예: 2025-01, 이중직업 시즌, 시즌 1)',def);
+  if(name===null)return;
+  archiveCurrentSeason(name.trim()||def);
 }
 function toggleHF(type,val){histFilter[type][val]=!histFilter[type][val];renderRecords();}
 function toggleHCls(val){histFilter.cls=histFilter.cls===val?null:val;renderRecords();}
@@ -1561,13 +1517,12 @@ function renderMemoPage(){
 /* ════════ PAGE SWITCH ════════ */
 function showPage(name){
   curPage=name;
-  ['main','rating','records','memo','data'].forEach(p=>{
+  ['main','records','memo','data'].forEach(p=>{
     const pg=document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1));
     if(pg)pg.classList.toggle('active',p===name);
     const nb=document.getElementById('nav-'+p);if(nb)nb.classList.toggle('nav-active',p===name);
   });
   if(name==='records')renderRecords();
-  if(name==='rating')renderRatingPage();
 }
 
 /* ════════ POPUPS ════════ */
@@ -1595,7 +1550,6 @@ const originEl=document.getElementById('currentOrigin');
 if(originEl)originEl.textContent=location.origin;
 setInterval(()=>{if(gToken)renderResetTimers();},60000);
 window.addEventListener('resize',()=>{
-  if(curPage==='rating')drawRatingChart(getRatings().filter(r=>ratingFilter.acc[r.acc]&&ratingFilter.srv[r.srv]));
   positionSideMemo();
 });
 window.addEventListener('load',()=>initGSI());

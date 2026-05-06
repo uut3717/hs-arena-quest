@@ -1229,11 +1229,12 @@ function renderDeck(){
     const resLbl=m.result==='W'?'승':m.result==='L'?'패':'?';
     const dt=m.matchAt?new Date(m.matchAt).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
     return `<div class="opp-row-wrap"><div class="opp-row">
-      <div class="opp-row-top">
+      <div class="opp-row-top" style="${DUAL_CLASS_SEASON?'grid-template-columns:30px 76px 76px 140px 40px 24px':''}">
         <span class="opp-coin ${coinCls}" onclick="toggleMatchCoin('${a}','${s}',${i})" title="선/후 전환">${coinLbl}</span>
         <select class="opp-cls-sel" onchange="updateMatch('${a}','${s}',${i},'cls',this.value)">
           <option value="">—</option>${CLS_ORDER.map(c=>`<option value="${c}"${c===m.cls?' selected':''}>${CLS_S[c]||c}</option>`).join('')}
         </select>
+        ${DUAL_CLASS_SEASON?`<select class="opp-cls-sel" title="상대 영능" onchange="updateMatch('${a}','${s}',${i},'oppHeroPower',this.value)"><option value="">영능—</option>${CLS_ORDER.map(c=>`<option value="${c}"${c===m.oppHeroPower?' selected':''}>${CLS_S[c]||c}</option>`).join('')}</select>`:''}
         <input class="opp-leg-inp" type="text" placeholder="상대 전설" value="${(m.oppLeg||'').replace(/"/g,'&quot;')}"
           oninput="updateMatch('${a}','${s}',${i},'oppLeg',this.value)">
         <span class="opp-result-tog ${resCls}" onclick="toggleMatchResult('${a}','${s}',${i})" title="클릭 전환">${resLbl}</span>
@@ -1309,8 +1310,8 @@ function renderDeck(){
         <span class="opp-title">매치 기록 (${opps.length}전)</span>
         ${foldBtn}
       </div>
-      <div class="opp-row-wrap"><div style="font-size:10px;color:var(--text3);padding:3px 0 2px;display:grid;grid-template-columns:30px 76px 140px 40px 24px;gap:6px">
-        <span style="text-align:center">선/후</span><span style="text-align:center">직업</span><span>상대 전설</span><span style="text-align:center">결과</span><span></span>
+      <div class="opp-row-wrap"><div style="font-size:10px;color:var(--text3);padding:3px 0 2px;display:grid;grid-template-columns:${DUAL_CLASS_SEASON?'30px 76px 76px 140px 40px 24px':'30px 76px 140px 40px 24px'};gap:6px">
+        <span style="text-align:center">선/후</span><span style="text-align:center">직업</span>${DUAL_CLASS_SEASON?'<span style="text-align:center">영능</span>':''}<span>상대 전설</span><span style="text-align:center">결과</span><span></span>
       </div></div>
       <div class="opp-inner">${oppHtml||'<div style="padding:12px 14px;color:var(--text3);font-size:13px">매치를 추가하세요</div>'}</div>
     </div>
@@ -1482,7 +1483,7 @@ function openHistDetail(vi){
   const matches=(h.opponents||[]).map((m,i)=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px">
     <span style="color:var(--text3);width:20px;text-align:right">${i+1}</span>
     <span style="color:${m.coin==='first'?'#4a8fd4':'#c8963e'};width:22px">${m.coin==='first'?'선':'후'}</span>
-    <span style="width:28px;color:var(--text2)">${CLS_S[m.cls]||m.cls||'?'}</span>
+    <span style="width:28px;color:var(--text2)">${CLS_S[m.cls]||m.cls||'?'}${m.oppHeroPower?`<span style="color:var(--text3)">/${CLS_S[m.oppHeroPower]||m.oppHeroPower}</span>`:''}</span>
     <span style="width:22px;font-weight:700;color:${m.result==='W'?'var(--win)':m.result==='L'?'var(--loss)':'var(--text3)'}">${m.result==='W'?'승':m.result==='L'?'패':'?'}</span>
     <span style="color:var(--text2);flex:1">${m.btag||''}</span>
     ${m.oppLeg?`<span style="color:var(--text3);font-size:11px">[${m.oppLeg}]</span>`:''}
